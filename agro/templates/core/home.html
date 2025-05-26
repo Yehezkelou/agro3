@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title|default:"Plateforme Agricole" }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2d5a27;
+            --secondary-color: #4a7c59;
+            --accent-color: #8fbc8f;
+            --warning-color: #ff6b35;
+            --success-color: #28a745;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .badge-featured {
+            background-color: var(--warning-color);
+        }
+        
+        .badge-urgent {
+            background-color: #dc3545;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        
+        .category-card {
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .search-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .ad-image {
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .price-tag {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'core:home' %}">
+                <i class="fas fa-seedling me-2"></i>AgriMarket
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:home' %}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:search' %}">Rechercher</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:categories' %}">Catégories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:statistics' %}">Statistiques</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:about' %}">À propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:contact' %}">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Accueil -->
+    {% if request.resolver_match.url_name == 'home' %}
+    <main>
+        <!-- Section Hero -->
+        <section class="bg-light py-5">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 fw-bold text-dark mb-4">
+                            Plateforme Agricole Professionnelle
+                        </h1>
+                        <p class="lead mb-4">
+                            Trouvez et vendez du matériel agricole, des produits et services 
+                            dans votre région. Rejoignez notre communauté d'agriculteurs professionnels.
+                        </p>
+                        <a href="{% url 'core:search' %}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-search me-2"></i>Parcourir les annonces
+                        </a>
+                        <a href="#" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Publier une annonce
+                        </a>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row g-3">
+                            {% for key, value in stats.items %}
+                            <div class="col-6">
+                                <div class="card stats-card text-center p-3">
+                                    <h3 class="mb-0">{{ value }}</h3>
+                                    <small>
+                                        {% if key == 'total_ads' %}Annonces actives
+                                        {% elif key == 'total_categories' %}Catégories
+                                        {% elif key == 'total_users' %}Utilisateurs
+                                        {% elif key == 'new_ads_this_month' %}Nouvelles ce mois
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Annonces en Vedette -->
+        {% if featured_ads %}
+        <section class="py-5">
+            <div class="container">
+                <h2 class="mb-4">
+                    <i class="fas fa-star text-warning me-2"></i>Annonces en Vedette
+                </h2>
+                <div class="row g-4">
+                    {% for ad in featured_ads %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100">
+                            {% if ad.images.first %}
+                            <img src="{{ ad.images.first.image.url }}" class="card-img-top ad-image" alt="{{ ad.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-success">{{ user.ad_count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Évolution mensuelle -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Évolution des annonces (12 derniers mois)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="monthlyChart" width="400" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Page À propos -->
+    {% if request.resolver_match.url_name == 'about' %}
+    <main class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="mb-4">À propos de nous</h1>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3>Notre Mission</h3>
+                            <p class="lead">
+                                Nous connectons les professionnels du secteur agricole en créant une plateforme 
+                                moderne et efficace pour l'achat et la vente de matériel, produits et services agricoles.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h3>Nos Valeurs</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-handshake text-primary me-3 mt-1"></i>
+                                        <div>
+                                            <h5>Confiance</h5>
+                                            <p>Nous favorisons les relations de confiance entre agriculteurs et professionnels.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-leaf text-success me-3 mt-1"></i>
+                                        <div>
+                                            <h5>Durabilité</h5>
+                                            <p>Nous soutenons une agriculture durable et respectueuse de l'environnement.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-users text-info me-3 mt-1"></i>
+                                        <div>
+                                            <h5>Communauté</h5>
+                                            <p>Nous créons une communauté soudée de professionnels agricoles.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <i class="fas fa-rocket text-warning me-3 mt-1"></i>
+                                        <div>
+                                            <h5>Innovation</h5>
+                                            <p>Nous utilisons la technologie pour moderniser le secteur agricole.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques de la plateforme -->
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="mb-4">Notre Impact</h3>
+                            <div class="row g-4">
+                                <div class="col-6 col-md-3">
+                                    <div class="stats-card p-3 rounded">
+                                        <h4>{{ stats.total_ads }}</h4>
+                                        <small>Annonces publiées</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="stats-card p-3 rounded">
+                                        <h4>{{ stats.total_users }}</h4>
+                                        <small>Utilisateurs actifs</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="stats-card p-3 rounded">
+                                        <h4>{{ stats.total_categories }}</h4>
+                                        <small>Catégories</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="stats-card p-3 rounded">
+                                        <h4>{{ stats.platform_age|default:"1" }}</h4>
+                                        <small>Année{{ stats.platform_age|pluralize }} d'existence</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Page Contact -->
+    {% if request.resolver_match.url_name == 'contact' %}
+    <main class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="mb-4">Nous contacter</h1>
+                    
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <div class="row g-4">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h3 class="mb-4">Envoyez-nous un message</h3>
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Prénom *</label>
+                                                <input type="text" class="form-control" name="first_name" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Nom *</label>
+                                                <input type="text" class="form-control" name="last_name" required>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Email *</label>
+                                                <input type="email" class="form-control" name="email" required>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Téléphone</label>
+                                                <input type="tel" class="form-control" name="phone">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Sujet *</label>
+                                                <select class="form-select" name="subject" required>
+                                                    <option value="">Choisissez un sujet</option>
+                                                    <option value="general">Question générale</option>
+                                                    <option value="technical">Problème technique</option>
+                                                    <option value="account">Problème de compte</option>
+                                                    <option value="ad">Problème avec une annonce</option>
+                                                    <option value="partnership">Partenariat</option>
+                                                    <option value="other">Autre</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Message *</label>
+                                                <textarea class="form-control" name="message" rows="6" required 
+                                                          placeholder="Décrivez votre demande en détail..."></textarea>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="newsletter" id="newsletter">
+                                                    <label class="form-check-label" for="newsletter">
+                                                        Je souhaite recevoir la newsletter
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary btn-lg">
+                                                    <i class="fas fa-paper-plane me-2"></i>Envoyer le message
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="mb-3">Informations de contact</h5>
+                                    
+                                    <div class="mb-3">
+                                        <i class="fas fa-envelope text-primary me-2"></i>
+                                        <strong>Email</strong><br>
+                                        <a href="mailto:contact@agrimarket.fr">contact@agrimarket.fr</a>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <i class="fas fa-phone text-primary me-2"></i>
+                                        <strong>Téléphone</strong><br>
+                                        <a href="tel:+33123456789">+33 1 23 45 67 89</a>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                        <strong>Adresse</strong><br>
+                                        123 Rue de l'Agriculture<br>
+                                        75001 Paris, France
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <i class="fas fa-clock text-primary me-2"></i>
+                                        <strong>Horaires</strong><br>
+                                        Lun - Ven: 9h00 - 18h00<br>
+                                        Sam: 9h00 - 12h00
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-body text-center">
+                                    <h6 class="mb-3">Suivez-nous</h6>
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <a href="#" class="btn btn-outline-primary btn-sm">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-outline-info btn-sm">
+                                            <i class="fab fa-twitter"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-outline-danger btn-sm">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-seedling me-2"></i>AgriMarket
+                    </h5>
+                    <p>
+                        La plateforme de référence pour les professionnels de l'agriculture. 
+                        Achetez, vendez et échangez en toute confiance.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Navigation</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'core:home' %}" class="text-light text-decoration-none">Accueil</a></li>
+                        <li><a href="{% url 'core:search' %}" class="text-light text-decoration-none">Rechercher</a></li>
+                        <li><a href="{% url 'core:categories' %}" class="text-light text-decoration-none">Catégories</a></li>
+                        <li><a href="{% url 'core:statistics' %}" class="text-light text-decoration-none">Statistiques</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Support</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'core:about' %}" class="text-light text-decoration-none">À propos</a></li>
+                        <li><a href="{% url 'core:contact' %}" class="text-light text-decoration-none">Contact</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">FAQ</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Aide</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Légal</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">CGU</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Confidentialité</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Cookies</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Mentions légales</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Contact</h6>
+                    <ul class="list-unstyled">
+                        <li class="text-light">
+                            <i class="fas fa-envelope me-2"></i>
+                            contact@agrimarket.fr
+                        </li>
+                        <li class="text-light">
+                            <i class="fas fa-phone me-2"></i>
+                            +33 1 23 45 67 89
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="my-4 border-light">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 AgriMarket. Tous droits réservés.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small>Plateforme développée pour les professionnels agricoles</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js pour les statistiques -->
+    {% if request.resolver_match.url_name == 'statistics' %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Graphique d'évolution mensuelle
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const monthlyData = {{ monthly_stats|safe }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(item => item.month),
+                datasets: [{
+                    label: 'Nouvelles annonces',
+                    data: monthlyData.map(item => item.ads_count),
+                    borderColor: '#2d5a27',
+                    backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+
+    <!-- Autocomplétion pour la recherche -->
+    {% if request.resolver_match.url_name == 'search' or request.resolver_match.url_name == 'home' %}
+    <script>
+        // Autocomplétion de recherche
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            let timeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                const query = this.value.trim();
+                
+                if (query.length >= 2) {
+                    timeout = setTimeout(() => {
+                        fetch(`{% url 'core:search_suggestions' %}?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // Ici vous pouvez implémenter l'affichage des suggestions
+                                console.log('Suggestions:', data.suggestions);
+                            })
+                            .catch(error => console.error('Erreur:', error));
+                    }, 300);
+                }
+            });
+        }
+    </script>
+    {% endif %}
+
+    <!-- Script pour les messages d'alerte auto-dismiss -->
+    <script>
+        // Auto-dismiss des alertes après 5 secondes
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>="badge bg-primary">{{ ad.category.name }}</span>
+                                    <span class="badge badge-featured">Vedette</span>
+                                </div>
+                                <h5 class="card-title">{{ ad.title|truncatechars:50 }}</h5>
+                                <p class="card-text text-muted">{{ ad.description|truncatechars:80 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price-tag">
+                                        {% if ad.price %}{{ ad.price|floatformat:0 }} €{% else %}Prix non spécifié{% endif %}
+                                    </span>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ ad.location|default:"Non spécifié" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <small class="text-muted">
+                                    Par {{ ad.author.get_full_name|default:ad.author.username }} • 
+                                    {{ ad.created_at|timesince }} 
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Annonces Urgentes -->
+        {% if urgent_ads %}
+        <section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>Annonces Urgentes
+                </h2>
+                <div class="row g-4">
+                    {% for ad in urgent_ads %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100">
+                            {% if ad.images.first %}
+                            <img src="{{ ad.images.first.image.url }}" class="card-img-top ad-image" alt="{{ ad.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <span class="badge badge-urgent mb-2">Urgent</span>
+                                <h6 class="card-title">{{ ad.title|truncatechars:40 }}</h6>
+                                <p class="card-text small">{{ ad.description|truncatechars:60 }}</p>
+                                <div class="price-tag">
+                                    {% if ad.price %}{{ ad.price|floatformat:0 }} €{% else %}Sur demande{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Top Catégories -->
+        <section class="py-5">
+            <div class="container">
+                <h2 class="mb-4">
+                    <i class="fas fa-layer-group me-2"></i>Catégories Populaires
+                </h2>
+                <div class="row g-4">
+                    {% for category in top_categories %}
+                    <div class="col-lg-2 col-md-4 col-6">
+                        <a href="{% url 'core:category_detail' category.id %}" class="text-decoration-none">
+                            <div class="card category-card text-center p-3 h-100">
+                                <i class="fas fa-tractor fa-2x text-primary mb-2"></i>
+                                <h6 class="card-title mb-1">{{ category.name }}</h6>
+                                <small class="text-muted">{{ category.ad_count }} annonce{{ category.ad_count|pluralize }}</small>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Annonces Récentes -->
+        {% if recent_ads %}
+        <section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="mb-4">
+                    <i class="fas fa-clock me-2"></i>Annonces Récentes
+                </h2>
+                <div class="row g-4">
+                    {% for ad in recent_ads %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100">
+                            {% if ad.images.first %}
+                            <img src="{{ ad.images.first.image.url }}" class="card-img-top ad-image" alt="{{ ad.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <span class="badge bg-secondary mb-2">{{ ad.category.name }}</span>
+                                <h6 class="card-title">{{ ad.title|truncatechars:40 }}</h6>
+                                <div class="price-tag small">
+                                    {% if ad.price %}{{ ad.price|floatformat:0 }} €{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </main>
+    {% endif %}
+
+    <!-- Page de Recherche -->
+    {% if request.resolver_match.url_name == 'search' %}
+    <main class="py-4">
+        <div class="container">
+            <!-- Formulaire de recherche -->
+            <div class="search-form mb-5">
+                <form method="GET">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Rechercher</label>
+                            <input type="text" class="form-control" name="q" value="{{ search_query }}" 
+                                   placeholder="Mots-clés...">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Catégorie</label>
+                            <select class="form-select" name="category">
+                                <option value="">Toutes les catégories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>
+                                    {{ category.name }} ({{ category.ad_count }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Localisation</label>
+                            <input type="text" class="form-control" name="location" value="{{ selected_location }}" 
+                                   placeholder="Ville, région...">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i>Rechercher
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-2">
+                            <label class="form-label">Prix min</label>
+                            <input type="number" class="form-control" name="price_min" value="{{ price_min }}" 
+                                   placeholder="0">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Prix max</label>
+                            <input type="number" class="form-control" name="price_max" value="{{ price_max }}" 
+                                   placeholder="10000">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Trier par</label>
+                            <select class="form-select" name="sort">
+                                {% for key, label in sort_options.items %}
+                                <option value="{{ key }}" {% if key == sort_by %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Filtres</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="urgent" 
+                                           {% if is_urgent %}checked{% endif %}>
+                                    <label class="form-check-label">Urgent</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="featured" 
+                                           {% if is_featured %}checked{% endif %}>
+                                    <label class="form-check-label">En vedette</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Résultats de recherche -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Résultats de recherche</h3>
+                <span class="text-muted">{{ total_results }} résultat{{ total_results|pluralize }} trouvé{{ total_results|pluralize }}</span>
+            </div>
+
+            {% if ads %}
+            <div class="row g-4">
+                {% for ad in ads %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100">
+                        {% if ad.images.first %}
+                        <img src="{{ ad.images.first.image.url }}" class="card-img-top ad-image" alt="{{ ad.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary">{{ ad.category.name }}</span>
+                                <div>
+                                    {% if ad.is_featured %}<span class="badge badge-featured me-1">Vedette</span>{% endif %}
+                                    {% if ad.is_urgent %}<span class="badge badge-urgent">Urgent</span>{% endif %}
+                                </div>
+                            </div>
+                            <h5 class="card-title">{{ ad.title|truncatechars:50 }}</h5>
+                            <p class="card-text text-muted">{{ ad.description|truncatechars:80 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price-tag">
+                                    {% if ad.price %}{{ ad.price|floatformat:0 }} €{% else %}Sur demande{% endif %}
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ ad.location|default:"Non spécifié" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                                Par {{ ad.author.get_full_name|default:ad.author.username }} • 
+                                {{ ad.created_at|timesince }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if ads.has_other_pages %}
+            <nav aria-label="Navigation des pages" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if ads.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}page={{ ads.previous_page_number }}">Précédent</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in ads.paginator.page_range %}
+                    {% if ads.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if ads.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}page={{ ads.next_page_number }}">Suivant</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4>Aucun résultat trouvé</h4>
+                <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Page Catégories -->
+    {% if request.resolver_match.url_name == 'categories' %}
+    <main class="py-4">
+        <div class="container">
+            <h1 class="mb-4">Toutes les catégories</h1>
+            <div class="row g-4">
+                {% for category in categories %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <a href="{% url 'core:category_detail' category.id %}" class="text-decoration-none">
+                        <div class="card category-card h-100 p-3">
+                            <div class="text-center">
+                                <i class="fas fa-layer-group fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">{{ category.name }}</h5>
+                                <p class="text-muted mb-2">{{ category.ad_count }} annonce{{ category.ad_count|pluralize }}</p>
+                                {% if category.featured_count %}
+                                <small class="text-warning">
+                                    <i class="fas fa-star me-1"></i>{{ category.featured_count }} en vedette
+                                </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Page Détail Catégorie -->
+    {% if request.resolver_match.url_name == 'category_detail' %}
+    <main class="py-4">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h1>{{ category.name }}</h1>
+                    {% if category.description %}
+                    <p class="lead text-muted">{{ category.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6>Statistiques</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>{{ stats.total_ads }}</strong> annonces totales</li>
+                                <li><strong>{{ stats.featured_ads }}</strong> en vedette</li>
+                                <li><strong>{{ stats.urgent_ads }}</strong> urgentes</li>
+                                {% if stats.avg_price %}
+                                <li><strong>{{ stats.avg_price|floatformat:0 }} €</strong> prix moyen</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if ads %}
+            <div class="row g-4">
+                {% for ad in ads %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100">
+                        {% if ad.images.first %}
+                        <img src="{{ ad.images.first.image.url }}" class="card-img-top ad-image" alt="{{ ad.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="mb-2">
+                                {% if ad.is_featured %}<span class="badge badge-featured me-1">Vedette</span>{% endif %}
+                                {% if ad.is_urgent %}<span class="badge badge-urgent">Urgent</span>{% endif %}
+                            </div>
+                            <h5 class="card-title">{{ ad.title|truncatechars:50 }}</h5>
+                            <p class="card-text text-muted">{{ ad.description|truncatechars:80 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="price-tag">
+                                    {% if ad.price %}{{ ad.price|floatformat:0 }} €{% else %}Sur demande{% endif %}
+                                </span>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ ad.location|default:"Non spécifié" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                                Par {{ ad.author.get_full_name|default:ad.author.username }} • 
+                                {{ ad.created_at|timesince }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if ads.has_other_pages %}
+            <nav aria-label="Navigation des pages" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if ads.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ ads.previous_page_number }}">Précédent</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in ads.paginator.page_range %}
+                    {% if ads.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if ads.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ ads.next_page_number }}">Suivant</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h4>Aucune annonce dans cette catégorie</h4>
+                <p class="text-muted">Soyez le premier à publier une annonce dans cette catégorie !</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Page Statistiques -->
+    {% if request.resolver_match.url_name == 'statistics' %}
+    <main class="py-4">
+        <div class="container">
+            <h1 class="mb-4">Statistiques de la plateforme</h1>
+            
+            <!-- Statistiques générales -->
+            <div class="row g-4 mb-5">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stats-card text-center p-4">
+                        <i class="fas fa-bullhorn fa-2x mb-2"></i>
+                        <h3>{{ total_ads }}</h3>
+                        <small>Annonces totales</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stats-card text-center p-4">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h3>{{ active_ads }}</h3>
+                        <small>Annonces actives</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stats-card text-center p-4">
+                        <i class="fas fa-calendar-week fa-2x mb-2"></i>
+                        <h3>{{ ads_this_week }}</h3>
+                        <small>Cette semaine</small>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stats-card text-center p-4">
+                        <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                        <h3>{{ ads_this_month }}</h3>
+                        <small>Ce mois-ci</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Top catégories -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Top 10 des catégories</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for category in top_categories %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ category.name }}</span>
+                                <span class="badge bg-primary">{{ category.ad_count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top utilisateurs -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Utilisateurs les plus actifs</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for user in top_users %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ user.get_full_name|default:user.username }}</span>
+                                <span class="badge bg-success">{{ user.ad_count }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Évolution mensuelle -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Évolution des annonces (12 derniers mois)</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="monthlyChart" width="400" height="100"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques par région -->
+            {% if regional_stats %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Répartition géographique</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for region in regional_stats %}
+                                <div class="col-md-4">
+                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                                        <span>{{ region.name }}</span>
+                                        <span class="badge bg-info">{{ region.ad_count }} annonces</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Analyse des prix -->
+            {% if price_stats %}
+            <div class="row mt-4">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Analyse des prix</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3 text-center">
+                                <div class="col-4">
+                                    <h4 class="text-primary">{{ price_stats.avg_price|floatformat:0 }}€</h4>
+                                    <small class="text-muted">Prix moyen</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 class="text-success">{{ price_stats.min_price|floatformat:0 }}€</h4>
+                                    <small class="text-muted">Prix minimum</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 class="text-warning">{{ price_stats.max_price|floatformat:0 }}€</h4>
+                                    <small class="text-muted">Prix maximum</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Répartition par tranche de prix -->
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Répartition par tranche de prix</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for range in price_ranges %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>{{ range.label }}</span>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 100px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ range.percentage }}%"></div>
+                                    </div>
+                                    <span class="badge bg-secondary">{{ range.count }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tendances récentes -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Tendances de la semaine</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-3 text-center">
+                                    <div class="p-3 bg-light rounded">
+                                        <i class="fas fa-trending-up fa-2x text-success mb-2"></i>
+                                        <h5>+{{ weekly_growth|default:0 }}%</h5>
+                                        <small class="text-muted">Croissance hebdomadaire</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="p-3 bg-light rounded">
+                                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                                        <h5>{{ featured_percentage|default:0 }}%</h5>
+                                        <small class="text-muted">Annonces en vedette</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="p-3 bg-light rounded">
+                                        <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                        <h5>{{ avg_response_time|default:"2h" }}</h5>
+                                        <small class="text-muted">Temps de réponse moyen</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="p-3 bg-light rounded">
+                                        <i class="fas fa-thumbs-up fa-2x text-primary mb-2"></i>
+                                        <h5>{{ satisfaction_rate|default:95 }}%</h5>
+                                        <small class="text-muted">Taux de satisfaction</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    {% endif %}
+
+    <!-- Footer -->
+    <footer class="py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-seedling me-2"></i>AgriMarket
+                    </h5>
+                    <p>
+                        La plateforme de référence pour les professionnels de l'agriculture. 
+                        Achetez, vendez et échangez en toute confiance.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-sm">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Navigation</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'core:home' %}" class="text-light text-decoration-none">Accueil</a></li>
+                        <li><a href="{% url 'core:search' %}" class="text-light text-decoration-none">Rechercher</a></li>
+                        <li><a href="{% url 'core:categories' %}" class="text-light text-decoration-none">Catégories</a></li>
+                        <li><a href="{% url 'core:statistics' %}" class="text-light text-decoration-none">Statistiques</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Support</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'core:about' %}" class="text-light text-decoration-none">À propos</a></li>
+                        <li><a href="{% url 'core:contact' %}" class="text-light text-decoration-none">Contact</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">FAQ</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Aide</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Légal</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light text-decoration-none">CGU</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Confidentialité</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Cookies</a></li>
+                        <li><a href="#" class="text-light text-decoration-none">Mentions légales</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-2">
+                    <h6 class="mb-3">Contact</h6>
+                    <ul class="list-unstyled">
+                        <li class="text-light">
+                            <i class="fas fa-envelope me-2"></i>
+                            contact@agrimarket.fr
+                        </li>
+                        <li class="text-light">
+                            <i class="fas fa-phone me-2"></i>
+                            +33 1 23 45 67 89
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="my-4 border-light">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 AgriMarket. Tous droits réservés.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small>Plateforme développée pour les professionnels agricoles</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js pour les statistiques -->
+    {% if request.resolver_match.url_name == 'statistics' %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Graphique d'évolution mensuelle
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const monthlyData = {{ monthly_stats|safe }};
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(item => item.month),
+                datasets: [{
+                    label: 'Nouvelles annonces',
+                    data: monthlyData.map(item => item.ads_count),
+                    borderColor: '#2d5a27',
+                    backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        // Graphique en secteurs pour les catégories (optionnel)
+        if (document.getElementById('categoryChart')) {
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            const categoryData = {{ category_chart_data|safe }};
+            
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryData.map(item => item.name),
+                    datasets: [{
+                        data: categoryData.map(item => item.count),
+                        backgroundColor: [
+                            '#2d5a27', '#4a7c59', '#8fbc8f', '#ff6b35', '#28a745',
+                            '#17a2b8', '#ffc107', '#dc3545', '#6f42c1', '#e83e8c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    {% endif %}
+
+    <!-- Autocomplétion pour la recherche -->
+    {% if request.resolver_match.url_name == 'search' or request.resolver_match.url_name == 'home' %}
+    <script>
+        // Autocomplétion de recherche
+        const searchInput = document.querySelector('input[name="q"]');
+        if (searchInput) {
+            let timeout;
+            let suggestionsContainer;
+            
+            // Créer le conteneur des suggestions
+            if (!document.getElementById('search-suggestions')) {
+                suggestionsContainer = document.createElement('div');
+                suggestionsContainer.id = 'search-suggestions';
+                suggestionsContainer.className = 'position-absolute bg-white border rounded shadow-sm w-100';
+                suggestionsContainer.style.zIndex = '1000';
+                suggestionsContainer.style.display = 'none';
+                searchInput.parentNode.appendChild(suggestionsContainer);
+                searchInput.parentNode.style.position = 'relative';
+            } else {
+                suggestionsContainer = document.getElementById('search-suggestions');
+            }
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                const query = this.value.trim();
+                
+                if (query.length >= 2) {
+                    timeout = setTimeout(() => {
+                        fetch(`{% url 'core:search_suggestions' %}?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.suggestions && data.suggestions.length > 0) {
+                                    suggestionsContainer.innerHTML = '';
+                                    data.suggestions.forEach(suggestion => {
+                                        const item = document.createElement('div');
+                                        item.className = 'p-2 border-bottom suggestion-item';
+                                        item.style.cursor = 'pointer';
+                                        item.textContent = suggestion;
+                                        
+                                        item.addEventListener('click', function() {
+                                            searchInput.value = suggestion;
+                                            suggestionsContainer.style.display = 'none';
+                                        });
+                                        
+                                        item.addEventListener('mouseenter', function() {
+                                            this.style.backgroundColor = '#f8f9fa';
+                                        });
+                                        
+                                        item.addEventListener('mouseleave', function() {
+                                            this.style.backgroundColor = 'white';
+                                        });
+                                        
+                                        suggestionsContainer.appendChild(item);
+                                    });
+                                    suggestionsContainer.style.display = 'block';
+                                } else {
+                                    suggestionsContainer.style.display = 'none';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Erreur autocomplétion:', error);
+                                suggestionsContainer.style.display = 'none';
+                            });
+                    }, 300);
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+
+            // Masquer les suggestions au clic ailleurs
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+    </script>
+    {% endif %}
+
+    <!-- Script pour les messages d'alerte auto-dismiss -->
+    <script>
+        // Auto-dismiss des alertes après 5 secondes
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (alert.querySelector('.btn-close')) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+        }, 5000);
+
+        // Animation au scroll pour les cartes
+        function animateOnScroll() {
+            const cards = document.querySelectorAll('.card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        }
+
+        // Initialiser l'animation au chargement de la page
+        document.addEventListener('DOMContentLoaded', animateOnScroll);
+
+        // Confirmation avant suppression (si applicable)
+        function confirmDelete(message = 'Êtes-vous sûr de vouloir supprimer cet élément ?') {
+            return confirm(message);
+        }
+
+        // Copier le lien de partage
+        function copyShareLink(url) {
+            navigator.clipboard.writeText(url).then(function() {
+                // Afficher un toast de confirmation
+                const toast = document.createElement('div');
+                toast.className = 'toast position-fixed top-0 end-0 m-3';
+                toast.innerHTML = `
+                    <div class="toast-body bg-success text-white rounded">
+                        <i class="fas fa-check me-2"></i>Lien copié dans le presse-papiers !
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+                
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 3000);
+            }).catch(function(err) {
+                console.error('Erreur lors de la copie:', err);
+            });
+        }
+
+        // Lazy loading pour les images
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.classList.remove('lazy');
+                            imageObserver.unobserve(img);
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+    </script>
+
+    <!-- Analytics et tracking (optionnel) -->
+    {% if not debug %}
+    <script>
+        // Google Analytics ou autre solution de tracking
+        // (gtag.js, Matomo, etc.)
+    </script>
+    {% endif %}
+</body>
+</html>

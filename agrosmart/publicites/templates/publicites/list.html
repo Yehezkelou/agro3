@@ -1,0 +1,1222 @@
+{% extends 'base.html' %}
+
+{% block title %}Équipements agricoles - AgroSmart{% endblock %}
+{% load widget_tweaks %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #2ecc71;
+        --primary-dark: #27ae60;
+        --primary-light: #e8f7f0;
+        --secondary-color: #e74c3c;
+        --secondary-dark: #c0392b;
+        --accent-color: #3498db;
+        --accent-dark: #2980b9;
+        --premium-color: #f39c12;
+        --premium-dark: #e67e22;
+        --premium-gradient: linear-gradient(135deg, #f39c12, #e67e22);
+        
+        --bg-light: #ffffff;
+        --bg-light-alt: #f8f9fa;
+        --text-light: #2c3e50;
+        --text-muted-light: #7f8c8d;
+        --surface-light: #ffffff;
+        --input-border-light: #ecf0f1;
+        --input-bg-light: #ffffff;
+        --card-shadow-light: 0 8px 30px rgba(0, 0, 0, 0.1);
+        --hover-shadow-light: 0 15px 40px rgba(46, 204, 113, 0.2);
+        
+        --bg-dark: #121212;
+        --bg-dark-alt: #1e1e1e;
+        --text-dark: #ecf0f1;
+        --text-muted-dark: #bdc3c7;
+        --surface-dark: #1e1e1e;
+        --input-border-dark: #2c3e50;
+        --input-bg-dark: #2c3e50;
+        --card-shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.3);
+        --hover-shadow-dark: 0 15px 40px rgba(46, 204, 113, 0.15);
+        
+        --border-radius-sm: 8px;
+        --border-radius-md: 10px;
+        --border-radius-lg: 15px;
+        --border-radius-xl: 20px;
+        --border-radius-circle: 50%;
+        
+        --transition-fast: 0.2s ease;
+        --transition-normal: 0.3s ease;
+        --transition-slow: 0.5s ease;
+    }
+    
+    /* Dark mode variables */
+    .dark {
+        --bg-primary: var(--bg-dark);
+        --bg-alt: var(--bg-dark-alt);
+        --text-primary: var(--text-dark);
+        --text-muted: var(--text-muted-dark);
+        --surface: var(--surface-dark);
+        --input-border: var(--input-border-dark);
+        --input-bg: var(--input-bg-dark);
+        --card-shadow: var(--card-shadow-dark);
+        --hover-shadow: var(--hover-shadow-dark);
+    }
+    
+    /* Light mode variables (default) */
+    :root {
+        --bg-primary: var(--bg-light);
+        --bg-alt: var(--bg-light-alt);
+        --text-primary: var(--text-light);
+        --text-muted: var(--text-muted-light);
+        --surface: var(--surface-light);
+        --input-border: var(--input-border-light);
+        --input-bg: var(--input-bg-light);
+        --card-shadow: var(--card-shadow-light);
+        --hover-shadow: var(--hover-shadow-light);
+    }
+    
+    /* Theme Toggle */
+    .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--surface);
+        color: var(--text-primary);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-normal);
+    }
+    
+    .theme-toggle:hover {
+        transform: scale(1.1);
+    }
+
+    /* Page Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-header h2 {
+        font-size: clamp(2rem, 5vw, 2.5rem);
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 700;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 0.5rem;
+        transition: color var(--transition-normal);
+    }
+    
+    .page-header h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 2px;
+    }
+
+    .page-header p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        max-width: 800px;
+        margin: 0 auto;
+        transition: color var(--transition-normal);
+    }
+
+    /* Filters Section */
+    .filters-section {
+        background: var(--surface);
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: var(--card-shadow);
+        transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+        animation: fadeInUp 1s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .filters-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .filters-section legend {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        padding: 0 1rem;
+        position: relative;
+        display: inline-block;
+        transition: color var(--transition-normal);
+    }
+    
+    .filters-section legend::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50px;
+        height: 2px;
+        background: var(--primary-color);
+    }
+
+    .filters-section fieldset {
+        border: none;
+        padding: 0;
+    }
+
+    .filter-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        transition: color var(--transition-fast);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group label i {
+        color: var(--primary-color);
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.8rem 1rem;
+        border: 2px solid var(--input-border);
+        border-radius: var(--border-radius-sm);
+        font-size: 1rem;
+        transition: all var(--transition-normal);
+        background: var(--bg-alt);
+        color: var(--text-primary);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .form-group select {
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%232c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 2.5rem;
+    }
+    
+    .dark .form-group select {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ecf0f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background: var(--surface);
+        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .form-group input:hover:not(:focus),
+    .form-group select:hover:not(:focus) {
+        border-color: var(--primary-color);
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        grid-column: span 1;
+        cursor: pointer;
+        margin-top: 1.5rem;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary-color);
+        cursor: pointer;
+    }
+    
+    .checkbox-group label {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
+    .btn-filter, .btn-reset {
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: var(--border-radius-xl);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .btn-filter::after, .btn-reset::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+        transform: translateY(100%);
+        transition: transform 0.6s ease;
+        z-index: -1;
+    }
+    
+    .btn-filter:hover::after, .btn-reset:hover::after {
+        transform: translateY(-100%);
+    }
+
+    .btn-filter {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-reset {
+        background: var(--bg-alt);
+        color: var(--text-primary);
+        border: 2px solid var(--input-border);
+    }
+
+    .btn-reset:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-color: var(--primary-color);
+    }
+
+    /* Résultats */
+    .ads-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+        animation: fadeInUp 1s ease-out 0.2s;
+        animation-fill-mode: backwards;
+    }
+
+    .results-count {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color var(--transition-normal);
+    }
+    
+    .results-count i {
+        color: var(--primary-color);
+    }
+
+    .view-toggle {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .view-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--input-border);
+        background: var(--surface);
+        color: var(--text-primary);
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-btn.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .view-btn:hover:not(.active) {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .ads-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .ads-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        display: none; /* Initially hidden */
+    }
+
+    .ad-card {
+        background: var(--surface);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: all var(--transition-normal);
+        position: relative;
+        animation: fadeInUp 0.8s ease-out;
+        animation-fill-mode: backwards;
+    }
+    
+    .ad-card:nth-child(2n) {
+        animation-delay: 0.1s;
+    }
+    
+    .ad-card:nth-child(3n) {
+        animation-delay: 0.2s;
+    }
+
+    .ad-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .ad-card-list {
+        background: var(--surface);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        display: grid;
+        grid-template-columns: 200px 1fr auto;
+        gap: 1.5rem;
+        align-items: center;
+        transition: all var(--transition-normal);
+    }
+
+    .ad-card-list:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .premium-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, var(--premium-color), var(--premium-dark));
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+        animation: pulse 2s infinite;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .premium-badge i {
+        font-size: 0.7rem;
+    }
+
+    .ad-image {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ad-image img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform var(--transition-normal);
+    }
+    
+    .ad-card:hover .ad-image img {
+        transform: scale(1.05);
+    }
+
+    .ad-image-list img {
+        width: 200px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: var(--border-radius-sm);
+        transition: transform var(--transition-normal);
+    }
+    
+    .ad-card-list:hover .ad-image-list img {
+        transform: scale(1.05);
+    }
+
+    .no-image {
+        height: 200px;
+        background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7f8c8d;
+        font-style: italic;
+        font-size: 1.1rem;
+        transition: all var(--transition-normal);
+    }
+    
+    .dark .no-image {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: #ecf0f1;
+    }
+
+    .no-image-list {
+        width: 200px;
+        height: 150px;
+        background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7f8c8d;
+        font-style: italic;
+        border-radius: var(--border-radius-sm);
+        transition: all var(--transition-normal);
+    }
+    
+    .dark .no-image-list {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: #ecf0f1;
+    }
+
+    .ad-content {
+        padding: 1.5rem;
+    }
+
+    .ad-content h3 {
+        margin-bottom: 0.8rem;
+    }
+
+    .ad-content h3 a {
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 1.3rem;
+        font-weight: 600;
+        transition: color var(--transition-fast);
+        display: inline-block;
+        position: relative;
+    }
+
+    .ad-content h3 a:hover {
+        color: var(--primary-color);
+    }
+    
+    .ad-content h3 a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-color);
+        transition: width var(--transition-normal);
+    }
+    
+    .ad-content h3 a:hover::after {
+        width: 100%;
+    }
+
+    .ad-description {
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        transition: color var(--transition-normal);
+    }
+
+    .ad-price {
+        color: var(--secondary-color);
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .ad-price i {
+        font-size: 1.2rem;
+    }
+
+    .ad-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        transition: color var(--transition-normal);
+    }
+
+    .ad-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .ad-meta-item i {
+        color: var(--primary-color);
+    }
+
+    .category-badge {
+        background: var(--bg-alt);
+        color: var(--text-primary);
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all var(--transition-normal);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        border: 1px solid var(--input-border);
+    }
+    
+    .category-badge i {
+        color: var(--primary-color);
+        font-size: 0.7rem;
+    }
+    
+    .ad-card:hover .category-badge {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .ad-card:hover .category-badge i {
+        color: white;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+        animation: fadeInUp 1s ease-out 0.4s;
+        animation-fill-mode: backwards;
+    }
+
+    .page-links {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .page-links a,
+    .page-links .current {
+        padding: 0.8rem 1.2rem;
+        border-radius: var(--border-radius-sm);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all var(--transition-normal);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .page-links a {
+        background: var(--surface);
+        color: var(--text-primary);
+        border: 2px solid var(--input-border);
+    }
+
+    .page-links a:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(46, 204, 113, 0.2);
+    }
+
+    .page-links .current {
+        background: var(--primary-color);
+        color: white;
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 5px 15px rgba(46, 204, 113, 0.2);
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--surface);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--card-shadow);
+        animation: fadeInUp 1s ease-out;
+        position: relative;
+        overflow: hidden;
+        transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+    }
+    
+    .empty-state::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><path d="M30 10L50 70M50 10L30 70" stroke="%232ecc71" stroke-width="2" opacity="0.05"/></svg>');
+        opacity: 0.1;
+        pointer-events: none;
+    }
+
+    .empty-state h3 {
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        transition: color var(--transition-normal);
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        transition: color var(--transition-normal);
+    }
+
+    .empty-state a {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius-xl);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-normal);
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .empty-state a::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+        transform: translateY(100%);
+        transition: transform 0.6s ease;
+        z-index: -1;
+    }
+    
+    .empty-state a:hover::after {
+        transform: translateY(-100%);
+    }
+
+    .empty-state a:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+        }
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .ads-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ad-card-list {
+            grid-template-columns: 1fr;
+            text-align: center;
+        }
+        
+        .ad-image-list {
+            margin: 0 auto;
+        }
+
+        .ads-header {
+            flex-direction: column;
+            text-align: center;
+            align-items: center;
+        }
+
+        .page-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .ad-meta {
+            justify-content: center;
+        }
+    }
+    
+    /* Prefers reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+</style>
+
+<!-- Dark Mode Toggle -->
+<button class="theme-toggle" aria-label="Changer de thème">
+    <i class="fa-solid fa-sun"></i>
+</button>
+
+<div class="page-header">
+    <h2><i class="fa-solid fa-tractor"></i> Annonces agricoles</h2>
+    <p>Découvrez notre sélection d'annonces pour votre exploitation</p>
+</div>
+
+<!-- Formulaire de filtrage -->
+<div class="filters-section">
+    <form method="get">
+        <fieldset>
+            <legend><i class="fa-solid fa-filter"></i> Filtrer les annonces</legend>
+
+            <div class="filter-form">
+                <div class="form-group">
+                    <label for="{{ filter_form.category.id_for_label }}"><i class="fa-solid fa-tags"></i> {{ filter_form.category.label }}</label>
+                    {{ filter_form.category }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ filter_form.min_price.id_for_label }}"><i class="fa-solid fa-euro-sign"></i> {{ filter_form.min_price.label }}</label>
+                    {{ filter_form.min_price }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ filter_form.max_price.id_for_label }}"><i class="fa-solid fa-euro-sign"></i> {{ filter_form.max_price.label }}</label>
+                    {{ filter_form.max_price }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ filter_form.search.id_for_label }}"><i class="fa-solid fa-search"></i> {{ filter_form.search.label }}</label>
+                    {{ filter_form.search }}
+                </div>
+                
+                <div class="checkbox-group">
+                    {{ filter_form.premium_only }}
+                    <label for="{{ filter_form.premium_only.id_for_label }}"><i class="fa-solid fa-star"></i> {{ filter_form.premium_only.label }}</label>
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter"><i class="fa-solid fa-filter"></i> Filtrer</button>
+                <a href="{% url 'publicites:list' %}" class="btn-reset"><i class="fa-solid fa-rotate"></i> Réinitialiser</a>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<!-- En-tête des résultats -->
+<div class="ads-header">
+    <div class="results-count">
+        {% if ads %}
+            <i class="fa-solid fa-chart-simple"></i> {{ ads|length }} annonce{{ads|length|pluralize }} trouvée{{ ads|length|pluralize }}
+        {% endif %}
+    </div>
+    
+    <div class="view-toggle">
+        <button type="button" class="view-btn active" id="grid-view">
+            <i class="fa-solid fa-grip"></i> Grille
+        </button>
+        <button type="button" class="view-btn" id="list-view">
+            <i class="fa-solid fa-list"></i> Liste
+        </button>
+    </div>
+</div>
+
+<!-- Liste des équipements (Vue Grille) -->
+{% if ads %}
+    <div class="ads-grid" id="ads-grid-view">
+        {% for ad in ads %}
+            <article class="ad-card">
+                {% if ad.is_premium %}
+                    <span class="premium-badge"><i class="fa-solid fa-star"></i> PREMIUM</span>
+                {% endif %}
+                
+                <div class="ad-image">
+                    {% if ad.images.first %}
+                        <img src="{{ ad.images.first.image.url }}" alt="{{ ad.title }}">
+                    {% else %}
+                        <div class="no-image"><i class="fa-solid fa-image"></i> Pas d'image</div>
+                    {% endif %}
+                </div>
+                
+                <div class="ad-content">
+                    <h3><a href="{% url 'publicites:detail' ad.pk %}">{{ ad.title }}</a></h3>
+                    
+                    <p class="ad-description">{{ ad.description|truncatewords:20 }}</p>
+                    
+                    <div class="ad-price"><i class="fa-solid fa-tag"></i> {{ ad.price }} €</div>
+                    
+                    <div class="ad-meta">
+                        <div class="ad-meta-item">
+                            <span class="category-badge"><i class="fa-solid fa-folder"></i> {{ ad.category.name }}</span>
+                        </div>
+                        <div class="ad-meta-item">
+                            <i class="fa-solid fa-user"></i> {{ ad.author.username }}
+                        </div>
+                        <div class="ad-meta-item">
+                            <i class="fa-solid fa-calendar"></i> {{ ad.created_at|date:"d/m/Y" }}
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+    
+    <!-- Liste des équipements (Vue Liste) -->
+    <div class="ads-list" id="ads-list-view">
+        {% for ad in ads %}
+            <article class="ad-card-list">
+                <div class="ad-image-list">
+                    {% if ad.images.first %}
+                        <img src="{{ ad.images.first.image.url }}" alt="{{ ad.title }}">
+                    {% else %}
+                        <div class="no-image-list"><i class="fa-solid fa-image"></i> Pas d'image</div>
+                    {% endif %}
+                </div>
+                
+                <div class="ad-content">
+                    <h3><a href="{% url 'publicites:detail' ad.pk %}">{{ ad.title }}</a></h3>
+                    
+                    <p class="ad-description">{{ ad.description|truncatewords:20 }}</p>
+                    
+                    <div class="ad-meta">
+                        <div class="ad-meta-item">
+                            <span class="category-badge"><i class="fa-solid fa-folder"></i> {{ ad.category.name }}</span>
+                        </div>
+                        <div class="ad-meta-item">
+                            <i class="fa-solid fa-user"></i> {{ ad.author.username }}
+                        </div>
+                        <div class="ad-meta-item">
+                            <i class="fa-solid fa-calendar"></i> {{ ad.created_at|date:"d/m/Y" }}
+                        </div>
+                        {% if ad.is_premium %}
+                            <div class="ad-meta-item">
+                                <span class="premium-badge"><i class="fa-solid fa-star"></i> PREMIUM</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="ad-price"><i class="fa-solid fa-tag"></i> {{ ad.price }} €</div>
+            </article>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="pagination">
+            <div class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1"><i class="fa-solid fa-angles-left"></i> Première</a>
+                    <a href="?page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-angle-left"></i> Précédente</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Suivante <i class="fa-solid fa-angle-right"></i></a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Dernière <i class="fa-solid fa-angles-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <h3><i class="fa-solid fa-search"></i> Aucune annonce trouvée</h3>
+        <p>Essayez de modifier vos critères de recherche ou parcourez toutes les annonces disponibles.</p>
+        <a href="{% url 'publicites:list' %}"><i class="fa-solid fa-list"></i> Voir toutes les annonces</a>
+    </div>
+{% endif %}
+
+<!-- Ajout de Font Awesome pour les icônes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Script pour les animations et le dark mode -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du mode sombre
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+            updateThemeToggleIcon();
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateThemeToggleIcon();
+        });
+        
+        const themeToggle = document.querySelector('.theme-toggle');
+        
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            updateThemeToggleIcon();
+            
+            // Effet de ripple lors du clic
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            ripple.style.width = '100%';
+            ripple.style.height = '100%';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.opacity = '0';
+            
+            themeToggle.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+        
+        function updateThemeToggleIcon() {
+            const icon = document.querySelector('.theme-toggle i');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.className = 'fa-solid fa-moon';
+            } else {
+                icon.className = 'fa-solid fa-sun';
+            }
+        }
+        
+        // Toggle vue grille/liste
+        const gridViewBtn = document.getElementById('grid-view');
+        const listViewBtn = document.getElementById('list-view');
+        const gridView = document.getElementById('ads-grid-view');
+        const listView = document.getElementById('ads-list-view');
+        
+        if (gridViewBtn && listViewBtn && gridView && listView) {
+            gridViewBtn.addEventListener('click', () => {
+                gridView.style.display = 'grid';
+                listView.style.display = 'none';
+                gridViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+                
+                // Sauvegarder la préférence
+                localStorage.setItem('agrosmartViewPreference', 'grid');
+            });
+            
+            listViewBtn.addEventListener('click', () => {
+                gridView.style.display = 'none';
+                listView.style.display = 'flex';
+                gridViewBtn.classList.remove('active');
+                listViewBtn.classList.add('active');
+                
+                // Sauvegarder la préférence
+                localStorage.setItem('agrosmartViewPreference', 'list');
+            });
+            
+            // Charger la préférence sauvegardée
+            const savedViewPreference = localStorage.getItem('agrosmartViewPreference');
+            if (savedViewPreference === 'list') {
+                listViewBtn.click();
+            }
+        }
+        
+        // Animation sur focus des champs de formulaire
+        const formControls = document.querySelectorAll('.form-group input, .form-group select');
+        
+        formControls.forEach(input => {
+            const label = input.previousElementSibling;
+            
+            input.addEventListener('focus', () => {
+                if (label && label.tagName === 'LABEL') {
+                    label.style.color = 'var(--primary-color)';
+                }
+            });
+            
+            input.addEventListener('blur', () => {
+                if (label && label.tagName === 'LABEL') {
+                    label.style.color = '';
+                }
+            });
+        });
+        
+        // Effet de ripple sur les boutons
+        const buttons = document.querySelectorAll('.btn-filter, .btn-reset, .view-btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const ripple = document.createElement('span');
+                ripple.style.position = 'absolute';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                ripple.style.width = '0';
+                ripple.style.height = '0';
+                ripple.style.animation = 'ripple-effect 0.6s linear';
+                ripple.style.pointerEvents = 'none';
+                
+                // Set button position to relative if it's not already
+                if (getComputedStyle(this).position === 'static') {
+                    this.style.position = 'relative';
+                }
+                
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        
+        // Animation ripple-effect
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple-effect {
+                0% {
+                    width: 0;
+                    height: 0;
+                    opacity: 0.5;
+                }
+                100% {
+                    width: 500px;
+                    height: 500px;
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Préserver les paramètres de filtre dans la pagination
+        const paginationLinks = document.querySelectorAll('.pagination a');
+        paginationLinks.forEach(link => {
+            const url = new URL(link.href);
+            const params = new URLSearchParams(window.location.search);
+            
+            // Conserver tous les paramètres sauf 'page'
+            params.forEach((value, key) => {
+                if (key !== 'page') {
+                    url.searchParams.set(key, value);
+                }
+            });
+            
+            link.href = url.toString();
+        });
+    });
+</script>
+{% endblock %}

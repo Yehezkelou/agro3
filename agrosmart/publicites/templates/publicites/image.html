@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Gérer les images - {{ ad.title }} - AgroSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+    <!-- En-tête de page avec animation d'entrée -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 mb-8 text-center transform transition duration-500 hover:shadow-2xl animate-fade-in-up">
+        <h1 class="flex items-center justify-center gap-3 text-3xl font-bold text-gray-800 dark:text-white mb-2">
+            <span class="text-green-500 dark:text-green-400 animate-bounce-gentle">📸</span>
+            <span class="relative after:absolute after:bottom-0 after:left-0 after:h-1 after:w-0 after:bg-green-500 dark:after:bg-green-400 after:transition-all after:duration-500 hover:after:w-full">
+                Gérer les images
+            </span>
+        </h1>
+        <p class="text-gray-600 dark:text-gray-300 text-lg">{{ ad.title }}</p>
+    </div>
+
+    <!-- Formulaire d'ajout d'image avec effet hover -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-8 mb-8 transform transition duration-500 hover:shadow-xl">
+        <h2 class="flex items-center text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            <span class="mr-2 text-green-500 dark:text-green-400">➕</span>
+            Ajouter une nouvelle image
+        </h2>
+        
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Champ d'upload d'image -->
+            <div class="space-y-2">
+                <label for="{{ form.image.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    {{ form.image.label }}
+                </label>
+                <div class="relative group">
+                    <input type="{{ form.image.field.widget.input_type }}" 
+                           name="{{ form.image.name }}" 
+                           id="{{ form.image.id_for_label }}"
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-transparent transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-green-500 file:text-white file:cursor-pointer hover:file:bg-green-600">
+                    <div class="absolute inset-0 w-full h-full border-2 border-green-500 dark:border-green-400 rounded-xl opacity-0 group-hover:opacity-30 pointer-events-none transition-opacity duration-300"></div>
+                </div>
+                {% if form.image.errors %}
+                    <ul class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-lg border-l-4 border-red-500 dark:border-red-600">
+                        {% for error in form.image.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <!-- Champ de légende -->
+            <div class="space-y-2">
+                <label for="{{ form.caption.id_for_label }}" class="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    {{ form.caption.label }}
+                </label>
+                <div class="relative group">
+                    <textarea name="{{ form.caption.name }}" 
+                           id="{{ form.caption.id_for_label }}"
+                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:border-transparent transition-all duration-300 min-h-[120px] resize-y"
+                           >{{ form.caption.value|default:'' }}</textarea>
+                    <div class="absolute inset-0 w-full h-full border-2 border-green-500 dark:border-green-400 rounded-xl opacity-0 group-hover:opacity-30 pointer-events-none transition-opacity duration-300"></div>
+                </div>
+                {% if form.caption.errors %}
+                    <ul class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-lg border-l-4 border-red-500 dark:border-red-600">
+                        {% for error in form.caption.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <!-- Case à cocher pour l'image principale -->
+            <div class="space-y-2">
+                <div class="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:border-green-500 dark:hover:border-green-400 transition-colors duration-300">
+                    <input type="checkbox" 
+                           name="{{ form.is_main.name }}" 
+                           id="{{ form.is_main.id_for_label }}"
+                           {% if form.is_main.value %}checked{% endif %}
+                           class="w-6 h-6 text-green-500 dark:text-green-400 border-gray-300 rounded-md focus:ring-green-500 dark:focus:ring-green-400 cursor-pointer">
+                    <label for="{{ form.is_main.id_for_label }}" class="ml-3 text-gray-700 dark:text-gray-200 cursor-pointer">
+                        {{ form.is_main.label }}
+                    </label>
+                </div>
+                {% if form.is_main.errors %}
+                    <ul class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm px-4 py-3 rounded-lg border-l-4 border-red-500 dark:border-red-600">
+                        {% for error in form.is_main.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <!-- Bouton d'envoi -->
+            <button type="submit" class="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 text-white font-bold rounded-full overflow-hidden shadow-lg transition-all duration-300 hover:shadow-green-500/30 dark:hover:shadow-green-500/50 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800">
+                <span class="absolute right-0 -mt-12 -mr-12 h-32 w-8 opacity-10 bg-white transform rotate-12 transition-transform duration-1000 ease-out group-hover:translate-x-10"></span>
+                <span class="flex items-center">
+                    <span class="mr-2">📤</span>
+                    <span>Ajouter l'image</span>
+                </span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Liste des images existantes -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-8 mb-8 transform transition duration-500 hover:shadow-xl">
+        <h2 class="flex items-center text-2xl font-bold text-gray-800 dark:text-white mb-6">
+            <span class="mr-2 text-green-500 dark:text-green-400">🖼️</span>
+            Images existantes ({{ images|length }})
+        </h2>
+        
+        {% if images %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for image in images %}
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden group transform transition-all duration-500 hover:-translate-y-2 hover:shadow-xl relative">
+                        <!-- Effet de lueur sur hover -->
+                        <div class="absolute inset-0 bg-gradient-to-r from-green-400/0 via-green-400/0 to-green-400/0 group-hover:from-green-400/0 group-hover:via-green-400/30 group-hover:to-green-400/0 transition-all duration-1000 opacity-0 group-hover:opacity-100"></div>
+                        
+                        <!-- Image -->
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Image' }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                            
+                            <!-- Overlay de hover avec effet de fondu -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
+                        
+                        <!-- Informations de l'image -->
+                        <div class="p-5 relative">
+                            {% if image.is_main %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-400 to-amber-500 text-white shadow-md mb-3 animate-pulse-subtle">
+                                    ⭐ Image principale
+                                </span>
+                            {% endif %}
+                            
+                            <p class="text-gray-800 dark:text-white font-medium mb-4 min-h-[3rem]">
+                                {{ image.caption|default:'Aucune légende' }}
+                            </p>
+                            
+                            <a href="{% url 'publicites:image_delete' ad.pk image.pk %}" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white font-semibold rounded-lg shadow-md hover:shadow-red-500/50 transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                <span class="mr-1">🗑️</span>
+                                Supprimer
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-2xl p-12 text-center">
+                <div class="text-6xl mb-4 text-gray-400 dark:text-gray-500 opacity-50 animate-pulse-slow">📷</div>
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Aucune image</h3>
+                <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                    Cette annonce n'a pas encore d'images. Ajoutez-en une pour la rendre plus attractive !
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Lien de retour -->
+    <a href="{% url 'publicites:detail' ad.pk %}" class="inline-flex items-center group px-6 py-3 bg-white dark:bg-gray-800 text-green-600 dark:text-green-400 font-semibold rounded-full shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 transform transition-transform duration-300 group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Retour à l'annonce
+    </a>
+</div>
+
+<style>
+    /* Animations personnalisées */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    
+    @keyframes bounceGentle {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    @keyframes pulseSubtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    @keyframes pulseSlow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.3; }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .animate-bounce-gentle {
+        animation: bounceGentle 2s infinite;
+    }
+    
+    .animate-pulse-subtle {
+        animation: pulseSubtle 2s infinite;
+    }
+    
+    .animate-pulse-slow {
+        animation: pulseSlow 3s infinite;
+    }
+</style>
+
+<script>
+    // Support du mode sombre
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    });
+</script>
+{% endblock %}

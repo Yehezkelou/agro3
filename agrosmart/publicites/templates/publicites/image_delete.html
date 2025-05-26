@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer l'image - AgroSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-12 px-4 sm:px-6">
+    <!-- Carte avec animation d'entrée -->
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 animate-fade-in-up">
+        <!-- Titre avec icône animée -->
+        <div class="flex items-center justify-center gap-3 mb-8">
+            <div class="relative w-12 h-12 flex items-center justify-center">
+                <span class="absolute inset-0 rounded-full bg-red-500/20 dark:bg-red-600/20 animate-ping-slow"></span>
+                <span class="relative flex items-center justify-center w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full text-2xl">
+                    🗑️
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400 transform transition-transform duration-300 hover:scale-105">
+                Supprimer l'image
+            </h1>
+        </div>
+
+        <!-- Aperçu de l'image avec effet d'ombre -->
+        <div class="relative group mb-8">
+            <div class="absolute -inset-1 bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-3xl blur opacity-30 group-hover:opacity-70 transition duration-300"></div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden p-1">
+                <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Image' }}" 
+                     class="w-full h-auto rounded-xl transform transition-transform duration-500 group-hover:scale-[1.02]">
+            </div>
+            
+            {% if image.caption %}
+                <div class="mt-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl text-gray-700 dark:text-gray-300 italic text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    {{ image.caption }}
+                </div>
+            {% else %}
+                <div class="mt-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl text-gray-500 dark:text-gray-400 italic text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+                    Aucune légende
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Message d'avertissement avec animation subtile -->
+        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-600 p-5 rounded-lg mb-6 animate-pulse-subtle">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500 dark:text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-lg font-medium text-red-700 dark:text-red-300">
+                        Êtes-vous sûr de vouloir supprimer cette image ?
+                    </p>
+                    <p class="mt-1 text-red-600/80 dark:text-red-400/80">
+                        Cette action est irréversible et l'image sera définitivement supprimée.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire et boutons -->
+        <form method="post" class="mt-8">
+            {% csrf_token %}
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <!-- Bouton de suppression avec effet de shine -->
+                <button type="submit" 
+                        class="group relative inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 text-white font-bold rounded-full overflow-hidden shadow-lg transition-all duration-300 hover:shadow-red-500/30 dark:hover:shadow-red-500/50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800">
+                    <span class="absolute right-0 -mt-12 -mr-12 h-32 w-8 opacity-10 bg-white transform rotate-12 transition-transform duration-1000 ease-out group-hover:translate-x-10"></span>
+                    <span class="flex items-center">
+                        <span class="mr-2">✓</span>
+                        <span>Oui, supprimer</span>
+                    </span>
+                </button>
+                
+                <!-- Bouton d'annulation -->
+                <a href="{% url 'publicites:images' ad.pk %}" 
+                   class="group relative inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 dark:from-gray-600 dark:to-gray-700 text-white font-bold rounded-full overflow-hidden shadow-lg transition-all duration-300 hover:shadow-gray-500/30 dark:hover:shadow-gray-500/50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800">
+                    <span class="absolute right-0 -mt-12 -mr-12 h-32 w-8 opacity-10 bg-white transform rotate-12 transition-transform duration-1000 ease-out group-hover:translate-x-10"></span>
+                    <span class="flex items-center">
+                        <span class="mr-2">✕</span>
+                        <span>Annuler</span>
+                    </span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Animations personnalisées */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 40px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+    
+    @keyframes pingSlower {
+        0% { transform: scale(1); opacity: 0.2; }
+        70% { transform: scale(1.7); opacity: 0; }
+        100% { transform: scale(1.7); opacity: 0; }
+    }
+    
+    @keyframes pulseSubtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .animate-ping-slow {
+        animation: pingSlower 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    
+    .animate-pulse-subtle {
+        animation: pulseSubtle 3s infinite;
+    }
+</style>
+
+<script>
+    // Support du mode sombre
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    });
+</script>
+{% endblock %}

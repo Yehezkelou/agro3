@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Annonce Approuvée</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
+        .content { padding: 20px; border: 1px solid #ddd; }
+        .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #777; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Annonce Approuvée</h1>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour {{ ad.author.username }},</p>
+            
+            <p>Votre annonce <strong>"{{ ad.title }}"</strong> a été approuvée et est maintenant visible par tous les utilisateurs.</p>
+            
+            <p><strong>Détails de l'annonce :</strong></p>
+            <ul>
+                <li>Titre : {{ ad.title }}</li>
+                <li>Catégorie : {{ ad.category.name }}</li>
+                <li>Prix : {{ ad.price }} €</li>
+                <li>Localisation : {{ ad.location }}</li>
+                <li>Date d'expiration : {{ ad.campaign_end|date:"d/m/Y" }}</li>
+            </ul>
+            
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="{{ site_url }}{% url 'ads:ad_detail' ad.pk %}" class="btn">
+                    Voir mon annonce
+                </a>
+            </div>
+            
+            <p>Merci d'utiliser notre plateforme !</p>
+        </div>
+        
+        <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+            <p>&copy; {% now "Y" %} {{ site_name }}. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

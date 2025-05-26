@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Administration des annonces{% endblock %}
+
+{% block content %}
+<h1>Administration des annonces</h1>
+
+<!-- Filtres et recherche -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row align-items-end">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Recherche</label>
+                <input type="text" name="search" class="form-control" placeholder="Titre ou auteur..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Statut</label>
+                <select name="status" class="form-select">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>En attente</option>
+                    <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Approuvées</option>
+                    <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rejetées</option>
+                    <option value="expired" {% if current_status == 'expired' %}selected{% endif %}>Expirées</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <button type="submit" class="btn btn-primary">Filtrer</button>
+                <a href="{% url 'ads:admin_ads' %}" class="btn btn-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Actions en lot -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="post" action="{% url 'ads:bulk_ad_actions' %}" id="bulkActionForm">
+            {% csrf_token %}
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Action sur les sélectionnées</label>
+                    <select name="action" class="form-select">
+                        <option value="approve">Approuver</option>
+                        <option value="reject">Rejeter</option>
+                        <option value="feature">Mettre en vedette</option>
+                        <option value="unfeature">Retirer de la vedette</option>
+                        <option value="delete">Supprimer</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Confirmer cette action ?')">Exécuter</button>
+                </div>
+            </div>
+            <input type="hidden" name="selected_ads" id="selectedAds" value="">
+        </form>
+    </div>
+</div>
+
+<!-- Liste des annonces -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" class="form-check-input">
+                        </th>
+                        <th>Image</th>
+                        <th>Titre</th>
+                        <th>Auteur</th>
+                        <th>Catégorie</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ad in page_obj %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input ad-checkbox" value="{{ ad.id }}">
+                            </td>
+                            <td>
+                                {% if ad.images.all %}
+                                    <img src="{{ ad.images.all.0.image.url }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;" alt="{{ ad.title }}">
+                                {% else %}
+                                    <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <small class="text-muted">N/A</small>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'ads:ad_detail' ad.pk %}">{{ ad.title|truncatechars:30 }}</a>
+                                {% if ad.is_featured %}
+                                    <span class="badge bg-warning text-dark ms-1">⭐</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ad.author.get_full_name|default:ad.author.username }}</td>
+                            <td>{{ ad.category.name }}</td>
+                            <td>
+                                {% if ad.status == 'pending' %}
+                                    <span class="badge bg-warning">En attente</span>
+                                {% elif ad.status == 'approved' %}
+                                    <span class="badge bg-success">Approuvée</span>
+                                {% elif ad.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejetée</span>
+                                {% elif ad.status == 'expired' %}
+                                    <span class="badge bg-secondary">Expirée</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ad.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'ads:ad_detail' ad.pk %}" class="btn btn-outline-primary" title="Voir">
+                                        👁️
+                                    </a>
+                                    <a href="{% url 'ads:update_ad_status' ad.pk %}" class="btn btn-outline-warning" title="Modifier statut">
+                                        ⚙️
+                                    </a>
+                                    <a href="{% url 'ads:delete_ad' ad.pk %}" class="btn btn-outline-danger" title="Supprimer">
+                                        🗑️
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <p class="text-muted">Aucune annonce trouvée.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+    <nav aria-label="Pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Première</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Précédente</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Suivante</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Dernière</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const adCheckboxes = document.querySelectorAll('.ad-checkbox');
+    const bulkActionForm = document.getElementById('bulkActionForm');
+    const selectedAdsInput = document.getElementById('selectedAds');
+
+    // Sélectionner/désélectionner tout
+    selectAllCheckbox.addEventListener('change', function() {
+        adCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateSelectedAds();
+    });
+
+    // Écouter les changements sur chaque checkbox
+    adCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedAds);
+    });
+
+    function updateSelectedAds() {
+        const selectedIds = Array.from(adCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.value);
+        
+        selectedAdsInput.value = selectedIds.join(',');
+        
+        // Mettre à jour l'état du checkbox "sélectionner tout"
+        selectAllCheckbox.checked = selectedIds.length === adCheckboxes.length;
+        selectAllCheckbox.indeterminate = selectedIds.length > 0 && selectedIds.length < adCheckboxes.length;
+    }
+
+    // Vérifier qu'au moins une annonce est sélectionnée avant soumission
+    bulkActionForm.addEventListener('submit', function(e) {
+        if (!selectedAdsInput.value) {
+            e.preventDefault();
+            alert('Veuillez sélectionner au moins une annonce.');
+        }
+    });
+});
+</script>
+{% endblock %}

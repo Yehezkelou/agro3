@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer {{ ad.title }} - AgroSmart{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto my-12 px-4 sm:px-0">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 sm:p-12 text-center transform transition duration-300 hover:shadow-2xl">
+        <!-- Icon d'avertissement -->
+        <div class="text-6xl text-red-500 dark:text-red-400 mb-4 transition-transform duration-300 hover:scale-110">⚠️</div>
+        
+        <!-- Titre de la page -->
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">Supprimer l'annonce</h1>
+        
+        <!-- Message d'avertissement -->
+        <div class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/30 
+                    border-2 border-red-300 dark:border-red-700 rounded-2xl p-6 my-8 text-red-800 dark:text-red-300
+                    transform transition-all duration-300 hover:-translate-y-1">
+            <strong class="font-bold">Attention !</strong><br>
+            Vous êtes sur le point de supprimer définitivement cette annonce.
+            <br><strong class="font-bold">Cette action est irréversible.</strong>
+        </div>
+
+        <!-- Aperçu de l'annonce -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-6 my-8 text-left border-l-4 border-red-500 
+                    transition-all duration-300 hover:shadow-md">
+            <div class="text-xl font-semibold text-gray-800 dark:text-white mb-2">{{ ad.title }}</div>
+            <div class="text-gray-600 dark:text-gray-300 text-sm">
+                <div class="flex items-center space-x-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Prix: {{ ad.price }} €</span>
+                    <span class="mx-2">•</span>
+                    <span>Catégorie: {{ ad.category.name }}</span>
+                </div>
+                <div class="mt-1 flex items-center space-x-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Créée le {{ ad.created_at|date:"d/m/Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <button type="submit" 
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-full
+                        bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700
+                        text-white font-bold shadow-lg shadow-red-500/30 dark:shadow-red-600/30
+                        transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
+                        focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                    <span class="mr-2">🗑️</span>
+                    <span>Oui, supprimer définitivement</span>
+                </button>
+                
+                <a href="{% url 'publicites:detail' advertisement.pk %}"
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-full
+                        bg-gradient-to-r from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700
+                        text-white font-bold shadow-lg shadow-gray-400/30 dark:shadow-gray-600/30
+                        transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
+                        focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                    <span class="mr-2">↩️</span>
+                    <span>Non, annuler</span>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Support du mode sombre
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    });
+</script>
+{% endblock %}

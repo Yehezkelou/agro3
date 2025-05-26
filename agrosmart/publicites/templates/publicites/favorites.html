@@ -1,0 +1,1250 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes favoris - AgroSmart{% endblock %}
+
+{% block content %}
+<div class="favorites-app">
+  <div class="favorites-container">
+    <div class="page-header animate-fade-in">
+      <h1 class="page-title">
+        <span class="heart-icon">❤️</span> Mes favoris
+      </h1>
+      <p class="page-subtitle">Retrouvez toutes vos annonces sauvegardées</p>
+      
+      <div class="favorites-controls">
+        <div class="search-box">
+          <input type="text" id="searchFavorites" placeholder="Rechercher dans vos favoris..." class="search-input">
+          <button class="search-btn">🔍</button>
+        </div>
+        
+        <div class="sort-dropdown">
+          <button class="sort-btn">Trier par <span id="currentSort">Date</span> <span class="dropdown-arrow">▼</span></button>
+          <div class="sort-menu">
+            <button data-sort="date" class="sort-option active">Date d'ajout</button>
+            <button data-sort="price-asc" class="sort-option">Prix croissant</button>
+            <button data-sort="price-desc" class="sort-option">Prix décroissant</button>
+            <button data-sort="title" class="sort-option">Titre</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if favorites %}
+      <div class="favorites-grid" id="favoritesGrid">
+        {% for favorite in favorites %}
+          <article class="favorite-card animate-card" data-price="{{ favorite.advertisement.price }}" data-title="{{ favorite.advertisement.title }}" data-date="{{ favorite.created_at|date:'Y-m-d' }}" data-category="{{ favorite.advertisement.category.name }}">
+            {% if favorite.advertisement.is_premium %}
+              <span class="premium-badge">⭐ PREMIUM</span>
+            {% endif %}
+            
+            <div class="card-image-container">
+              {% if favorite.advertisement.images.first %}
+                <img src="{{ favorite.advertisement.images.first.image.url }}" 
+                     alt="{{ favorite.advertisement.title }}" 
+                     class="favorite-image">
+              {% else %}
+                <div class="favorite-image">📷</div>
+              {% endif %}
+              <div class="hover-overlay">
+                <button class="preview-btn" data-id="{{ favorite.advertisement.pk }}">Aperçu rapide</button>
+              </div>
+            </div>
+            
+            <div class="favorite-content">
+              <h3 class="favorite-title">
+                <a href="{% url 'publicites:detail' favorite.advertisement.pk %}">
+                  {{ favorite.advertisement.title }}
+                </a>
+              </h3>
+              
+              <div class="price-tag">
+                💰 {{ favorite.advertisement.price }} €
+              </div>
+              
+              <p class="favorite-description">
+                {{ favorite.advertisement.description|truncatewords:15 }}
+              </p>
+              
+              <div class="favorite-meta">
+                <div class="meta-item">
+                  <span class="meta-label">📂</span>
+                  <span class="meta-value">{{ favorite.advertisement.category.name }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">👤</span>
+                  <span class="meta-value">{{ favorite.advertisement.author.username }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">📅</span>
+                  <span class="meta-value">{{ favorite.advertisement.created_at|date:"d/m/Y" }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">📍</span>
+                  <span class="meta-value">{{ favorite.advertisement.location }}</span>
+                </div>
+              </div>
+              
+              <div class="favorite-actions">
+                <form method="post" action="{% url 'publicites:toggle_favorite' favorite.advertisement.pk %}" class="remove-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-remove">
+                    <span class="btn-icon">💔</span>
+                    <span class="btn-text">Retirer des favoris</span>
+                  </button>
+                </form>
+                
+                <a href="{% url 'publicites:detail' favorite.advertisement.pk %}" class="btn-view">
+                  <span class="btn-icon">👁️</span>
+                  <span class="btn-text">Voir détails</span>
+                </a>
+                
+                <span class="favorite-date">
+                  Ajouté le {{ favorite.created_at|date:"d/m/Y" }}
+                </span>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+      
+      <div class="pagination-container animate-fade-in">
+        <button id="loadMoreBtn" class="btn-load-more">Charger plus</button>
+      </div>
+      
+    {% else %}
+      <div class="empty-state animate-fade-in">
+        <div class="empty-icon animate-bounce">💔</div>
+        <h2 class="empty-title">Aucun favori pour le moment</h2>
+        <p class="empty-text">
+          Vous n'avez pas encore d'annonce favorite.<br>
+          Parcourez nos annonces et ajoutez-en à vos favoris pour les retrouver facilement !
+        </p>
+        <a href="{% url 'publicites:list' %}" class="btn-browse animate-pulse">
+          🔍 Parcourir les annonces
+        </a>
+      </div>
+    {% endif %}
+  </div>
+  
+  <button id="backToTop" class="back-to-top" title="Retour en haut">
+    <span>⬆️</span>
+  </button>
+  
+  <div id="previewModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <div class="modal-loading">
+        <div class="spinner"></div>
+        <p>Chargement des détails...</p>
+      </div>
+      <div class="modal-body"></div>
+    </div>
+  </div>
+  
+  <div id="filterSidebar" class="filter-sidebar">
+    <div class="filter-header">
+      <h3>Filtrer par catégorie</h3>
+      <button class="close-filters">&times;</button>
+    </div>
+    <div class="filter-body">
+      <button class="filter-btn active" data-category="all">Toutes les catégories</button>
+      {% for category in categories %}
+        <button class="filter-btn" data-category="{{ category.name }}">{{ category.name }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <button id="toggleFilters" class="toggle-filters-btn">
+    <span>🔍</span> Filtrer
+  </button>
+</div>
+
+<style>
+  :root {
+    --primary: #5D5CDE;
+    --primary-dark: #4a49b0;
+    --primary-light: #7a79e9;
+    --secondary: #27ae60;
+    --secondary-dark: #219a52;
+    --secondary-light: #2ecc71;
+    --danger: #e74c3c;
+    --danger-dark: #c0392b;
+    --warning: #f39c12;
+    --light: #ecf0f1;
+    --dark: #2c3e50;
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+    --text-light: #95a5a6;
+    --bg-light: #ffffff;
+    --bg-dark: #181818;
+    --shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
+    --border-radius: 20px;
+    --transition: all 0.3s ease;
+  }
+  
+  .dark {
+    --text-primary: #ecf0f1;
+    --text-secondary: #bdc3c7;
+    --text-light: #7f8c8d;
+    --bg-light: #2c3e50;
+    --bg-dark: #1a252f;
+    --shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.4);
+  }
+  
+  .favorites-app {
+    position: relative;
+  }
+  
+  .favorites-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .page-header {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: relative;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .heart-icon {
+    display: inline-block;
+    animation: heartbeat 1.5s ease-in-out infinite;
+  }
+  
+  .page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .favorites-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+  
+  .search-box {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    border-radius: 50px;
+    border: 2px solid var(--light);
+    background: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+  
+  .search-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.3);
+  }
+  
+  .search-btn {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  
+  .sort-dropdown {
+    position: relative;
+  }
+  
+  .sort-btn {
+    background: var(--bg-light);
+    border: 2px solid var(--light);
+    border-radius: 50px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+  }
+  
+  .sort-btn:hover {
+    border-color: var(--primary);
+  }
+  
+  .dropdown-arrow {
+    font-size: 0.8rem;
+    transition: var(--transition);
+  }
+  
+  .sort-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+  
+  .sort-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-light);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    width: 200px;
+    z-index: 10;
+    margin-top: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: var(--transition);
+  }
+  
+  .sort-dropdown.open .sort-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .sort-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.8rem 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .sort-option:hover, .sort-option.active {
+    background: rgba(93, 92, 222, 0.1);
+    color: var(--primary);
+  }
+  
+  .favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .favorite-card {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  
+  .favorite-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+  }
+  
+  .premium-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: linear-gradient(135deg, var(--warning), #e67e22);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+  }
+  
+  .card-image-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .favorite-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 3rem;
+    transition: transform 0.5s ease;
+  }
+  
+  .card-image-container:hover .favorite-image {
+    transform: scale(1.05);
+  }
+  
+  .hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+  }
+  
+  .card-image-container:hover .hover-overlay {
+    opacity: 1;
+  }
+  
+  .preview-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    transform: translateY(20px);
+  }
+  
+  .card-image-container:hover .preview-btn {
+    transform: translateY(0);
+  }
+  
+  .preview-btn:hover {
+    background: var(--primary-dark);
+  }
+  
+  .favorite-content {
+    padding: 1.5rem;
+  }
+  
+  .favorite-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .favorite-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .favorite-title a:hover {
+    color: var(--secondary);
+  }
+  
+  .price-tag {
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+    transition: var(--transition);
+  }
+  
+  .favorite-card:hover .price-tag {
+    transform: scale(1.05);
+  }
+  
+  .favorite-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+  
+  .favorite-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+  }
+  
+  .meta-label {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  
+  .meta-value {
+    color: var(--text-secondary);
+  }
+  
+  .favorite-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+  }
+  
+  .btn-remove, .btn-view {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  
+  .btn-remove {
+    background: linear-gradient(135deg, var(--danger), var(--danger-dark));
+    color: white;
+    border: none;
+  }
+  
+  .btn-view {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+  }
+  
+  .btn-remove:hover, .btn-view:hover {
+    transform: translateY(-1px);
+    filter: brightness(110%);
+  }
+  
+  .btn-remove:hover {
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+  }
+  
+  .btn-view:hover {
+    box-shadow: 0 5px 15px rgba(93, 92, 222, 0.3);
+  }
+  
+  .favorite-date {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    margin-left: auto;
+  }
+  
+  .empty-state {
+    text-align: center;
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    padding: 4rem 2rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .empty-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-title {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-text {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  
+  .btn-browse {
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: var(--transition);
+    display: inline-block;
+  }
+  
+  .btn-browse:hover {
+    background: linear-gradient(135deg, var(--secondary-dark), var(--secondary));
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+    color: white;
+  }
+  
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: var(--transition);
+    z-index: 99;
+    box-shadow: 0 5px 15px rgba(93, 92, 222, 0.3);
+  }
+  
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .back-to-top:hover {
+    background: var(--primary-dark);
+    transform: translateY(-5px);
+  }
+  
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--transition);
+  }
+  
+  .modal.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .modal-content {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+  }
+  
+  .modal.open .modal-content {
+    transform: scale(1);
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: var(--transition);
+  }
+  
+  .close-modal:hover {
+    color: var(--danger);
+    transform: rotate(90deg);
+  }
+  
+  .modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(93, 92, 222, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  .modal-body {
+    display: none;
+  }
+  
+  .filter-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 300px;
+    background: var(--bg-light);
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .filter-sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .filter-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .filter-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  
+  .close-filters {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: var(--transition);
+  }
+  
+  .close-filters:hover {
+    color: var(--danger);
+    transform: rotate(90deg);
+  }
+  
+  .filter-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .filter-btn {
+    text-align: left;
+    padding: 0.8rem 1.2rem;
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  
+  .toggle-filters-btn {
+    position: fixed;
+    left: 1rem;
+    bottom: 2rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 5px 15px rgba(93, 92, 222, 0.3);
+  }
+  
+  .toggle-filters-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+  
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .btn-load-more {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .btn-load-more:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(93, 92, 222, 0.3);
+  }
+  
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.2); }
+    20% { transform: scale(1); }
+    30% { transform: scale(1.2); }
+    40% { transform: scale(1); }
+    100% { transform: scale(1); }
+  }
+  
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(20px); }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .animate-card {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease;
+  }
+  
+  .animate-fade-out {
+    animation: fadeOut 0.5s ease forwards;
+  }
+  
+  .animate-bounce {
+    animation: bounce 2s ease infinite;
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s ease infinite;
+  }
+  
+  @media (max-width: 768px) {
+    .favorites-container {
+      padding: 0 0.5rem;
+    }
+    
+    .favorites-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .page-header {
+      padding: 1.5rem;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+    }
+    
+    .favorites-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .search-box {
+      max-width: 100%;
+    }
+    
+    .favorite-meta {
+      grid-template-columns: 1fr;
+    }
+    
+    .favorite-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+    
+    .favorite-date {
+      margin-left: 0;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    
+    .back-to-top {
+      bottom: 1rem;
+      right: 1rem;
+    }
+    
+    .filter-sidebar {
+      width: 100%;
+    }
+    
+    .modal-content {
+      width: 95%;
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Enable dark mode based on user preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+    
+    // Get DOM elements
+    const favoritesGrid = document.getElementById('favoritesGrid');
+    const backToTop = document.getElementById('backToTop');
+    const previewModal = document.getElementById('previewModal');
+    const modalBody = previewModal.querySelector('.modal-body');
+    const modalLoading = previewModal.querySelector('.modal-loading');
+    const closeModal = previewModal.querySelector('.close-modal');
+    const filterSidebar = document.getElementById('filterSidebar');
+    const toggleFilters = document.getElementById('toggleFilters');
+    const closeFilters = document.querySelector('.close-filters');
+    const sortDropdown = document.querySelector('.sort-dropdown');
+    const sortBtn = document.querySelector('.sort-btn');
+    const sortOptions = document.querySelectorAll('.sort-option');
+    const currentSort = document.getElementById('currentSort');
+    const searchInput = document.getElementById('searchFavorites');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    
+    // Staggered animation for cards
+    if (favoritesGrid) {
+      const cards = favoritesGrid.querySelectorAll('.favorite-card');
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.style.animation = `fadeIn 0.5s ease ${index * 0.1}s forwards`;
+        }, 100);
+      });
+    }
+    
+    // Back to top button
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTop.classList.add('visible');
+      } else {
+        backToTop.classList.remove('visible');
+      }
+    });
+    
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // Preview modal
+    const previewBtns = document.querySelectorAll('.preview-btn');
+    previewBtns.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const adId = btn.getAttribute('data-id');
+        
+        // Show modal with loading state
+        previewModal.classList.add('open');
+        modalBody.style.display = 'none';
+        modalLoading.style.display = 'flex';
+        
+        try {
+          // Here you would normally fetch the details from the server
+          // For this example, we'll simulate a network request
+          setTimeout(() => {
+            // Find the parent card element
+            const card = btn.closest('.favorite-card');
+            
+            // Clone the content for the modal
+            const cardContent = card.querySelector('.favorite-content').cloneNode(true);
+            const cardImage = card.querySelector('.favorite-image').cloneNode(true);
+            
+            // Create a more detailed view for the modal
+            const detailHtml = `
+              <div class="modal-ad-details">
+                <div class="modal-image-container">
+                  ${cardImage.outerHTML}
+                </div>
+                <div class="modal-ad-content">
+                  ${cardContent.innerHTML}
+                  <a href="/publicites/detail/${adId}/" class="btn-view full-width">
+                    <span class="btn-icon">👁️</span>
+                    <span class="btn-text">Voir l'annonce complète</span>
+                  </a>
+                </div>
+              </div>
+            `;
+            
+            // Update modal content
+            modalBody.innerHTML = detailHtml;
+            
+            // Show content, hide loading
+            modalLoading.style.display = 'none';
+            modalBody.style.display = 'block';
+          }, 1000); // Simulate network delay
+          
+        } catch (error) {
+          modalBody.innerHTML = `<div class="error-message">Une erreur est survenue lors du chargement des détails.</div>`;
+          modalLoading.style.display = 'none';
+          modalBody.style.display = 'block';
+        }
+      });
+    });
+    
+    // Close modal
+    closeModal.addEventListener('click', () => {
+      previewModal.classList.remove('open');
+    });
+    
+    previewModal.addEventListener('click', (e) => {
+      if (e.target === previewModal) {
+        previewModal.classList.remove('open');
+      }
+    });
+    
+    // Filter sidebar
+    toggleFilters.addEventListener('click', () => {
+      filterSidebar.classList.add('open');
+    });
+    
+    closeFilters.addEventListener('click', () => {
+      filterSidebar.classList.remove('open');
+    });
+    
+    // Sort dropdown
+    sortBtn.addEventListener('click', () => {
+      sortDropdown.classList.toggle('open');
+    });
+    
+    document.addEventListener('click', (e) => {
+      if (!sortDropdown.contains(e.target)) {
+        sortDropdown.classList.remove('open');
+      }
+    });
+    
+    // Sort functionality
+    sortOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // Update active state
+        sortOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        // Update button text
+        currentSort.textContent = option.textContent;
+        
+        // Close dropdown
+        sortDropdown.classList.remove('open');
+        
+        // Get sort type
+        const sortType = option.getAttribute('data-sort');
+        
+        // Sort the cards
+        sortCards(sortType);
+      });
+    });
+    
+    function sortCards(sortType) {
+      if (!favoritesGrid) return;
+      
+      const cards = Array.from(favoritesGrid.querySelectorAll('.favorite-card'));
+      
+      cards.forEach(card => {
+        card.classList.add('animate-fade-out');
+      });
+      
+      setTimeout(() => {
+        cards.sort((a, b) => {
+          if (sortType === 'date') {
+            return new Date(b.dataset.date) - new Date(a.dataset.date);
+          } else if (sortType === 'price-asc') {
+            return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+          } else if (sortType === 'price-desc') {
+            return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+          } else if (sortType === 'title') {
+            return a.dataset.title.localeCompare(b.dataset.title);
+          }
+          return 0;
+        });
+        
+        // Clear grid and add sorted cards
+        favoritesGrid.innerHTML = '';
+        cards.forEach((card, index) => {
+          card.classList.remove('animate-fade-out');
+          card.style.animation = `fadeIn 0.5s ease ${index * 0.1}s forwards`;
+          favoritesGrid.appendChild(card);
+        });
+      }, 500);
+    }
+    
+    // Search functionality
+    searchInput.addEventListener('input', debounce(function() {
+      filterCards();
+    }, 300));
+    
+    // Filter by category
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active state
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Apply filter
+        const category = btn.getAttribute('data-category');
+        filterCards(category);
+        
+        // Close sidebar on mobile
+        if (window.innerWidth < 768) {
+          filterSidebar.classList.remove('open');
+        }
+      });
+    });
+    
+    function filterCards(category) {
+      if (!favoritesGrid) return;
+      
+      const cards = favoritesGrid.querySelectorAll('.favorite-card');
+      const searchTerm = searchInput.value.toLowerCase();
+      
+      cards.forEach(card => {
+        const title = card.dataset.title.toLowerCase();
+        const cardCategory = card.dataset.category;
+        const matchesSearch = title.includes(searchTerm);
+        const matchesCategory = category === 'all' || category === undefined || cardCategory === category;
+        
+        if (matchesSearch && matchesCategory) {
+          card.style.display = '';
+          card.classList.remove('animate-fade-out');
+          setTimeout(() => {
+            card.classList.add('animate-fade-in');
+          }, 10);
+        } else {
+          card.classList.add('animate-fade-out');
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 500);
+        }
+      });
+    }
+    
+    // Remove favorites with animation
+    const removeForms = document.querySelectorAll('.remove-form');
+    removeForms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const card = this.closest('.favorite-card');
+        card.classList.add('animate-fade-out');
+        
+        setTimeout(() => {
+          // Submit the form after animation
+          this.submit();
+        }, 500);
+      });
+    });
+    
+    // Load more button (for demonstration)
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', function() {
+        this.innerHTML = '<span class="spinner-small"></span> Chargement...';
+        this.disabled = true;
+        
+        // Simulate loading more items
+        setTimeout(() => {
+          this.innerHTML = 'Charger plus';
+          this.disabled = false;
+        }, 1500);
+      });
+    }
+    
+    // Utility function for debouncing
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+  });
+</script>
+{% endblock %}

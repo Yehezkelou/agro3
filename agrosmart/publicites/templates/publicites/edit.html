@@ -1,0 +1,1723 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier {{ ad.title }} - AgroSmart{% endblock %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="edit-ad-app">
+  <div class="edit-container">
+    <!-- Breadcrumb navigation -->
+    <div class="breadcrumb-container animate__animated animate__fadeIn">
+      <div class="breadcrumbs">
+        <a href="{% url 'publicites:home' %}" class="breadcrumb-item">Accueil</a>
+        <span class="separator">›</span>
+        <a href="{% url 'publicites:list' %}" class="breadcrumb-item">Annonces</a>
+        <span class="separator">›</span>
+        <a href="{% url 'publicites:detail' advertisement.pk %}" class="breadcrumb-item">{{ ad.title }}</a>
+        <span class="separator">›</span>
+        <span class="breadcrumb-item active">Modifier</span>
+      </div>
+    </div>
+
+    <div class="page-header animate__animated animate__fadeInDown">
+      <h1 class="page-title">
+        <span class="edit-icon">✏️</span> Modifier l'annonce
+      </h1>
+      <p class="page-subtitle">Mettez à jour les informations de votre annonce</p>
+      
+      <!-- Form progress indicator -->
+      <div class="form-progress">
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+          <div class="progress-steps">
+            <div class="progress-step active" data-section="section-1">
+              <div class="step-circle">1</div>
+              <div class="step-label">Informations</div>
+            </div>
+            <div class="progress-step" data-section="section-2">
+              <div class="step-circle">2</div>
+              <div class="step-label">Prix & Catégorie</div>
+            </div>
+            <div class="progress-step" data-section="section-3">
+              <div class="step-circle">3</div>
+              <div class="step-label">Options</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="editForm">
+      {% csrf_token %}
+      
+      <div class="form-sections-container">
+        <!-- Section 1: Main Information -->
+        <div class="form-section active animate__animated animate__fadeIn" id="section-1">
+          <div class="section-header">
+            <h3 class="section-title">
+              <span class="section-icon">📝</span>
+              Informations principales
+            </h3>
+            <button type="button" class="toggle-section" title="Réduire/Agrandir">
+              <span class="toggle-icon">−</span>
+            </button>
+          </div>
+          
+          <div class="section-content">
+            <div class="form-group animate__animated animate__fadeInUp animate__delay-1s">
+              {{ form.title.label_tag }}
+              <div class="input-container">
+                {{ form.title|add_class:"form-control" }}
+                <span class="input-icon">📌</span>
+                <span class="character-count">
+                  <span id="titleCharCount">0</span>/100
+                </span>
+              </div>
+              {% if form.title.errors %}
+                <ul class="error-list animate__animated animate__shakeX">
+                  {% for error in form.title.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <p class="help-text">Un titre clair et précis pour attirer l'attention</p>
+            </div>
+            
+            <div class="form-group animate__animated animate__fadeInUp animate__delay-2s">
+              {{ form.description.label_tag }}
+              <div class="text-editor-toolbar">
+                <button type="button" class="editor-btn" data-format="bold" title="Gras">B</button>
+                <button type="button" class="editor-btn" data-format="italic" title="Italique">I</button>
+                <button type="button" class="editor-btn" data-format="underline" title="Souligné">U</button>
+                <button type="button" class="editor-btn" data-format="list" title="Liste">•</button>
+              </div>
+              <div class="input-container textarea-container">
+                {{ form.description|add_class:"form-control textarea" }}
+                <span class="character-count description-count">
+                  <span id="descCharCount">0</span>/1000
+                </span>
+              </div>
+              {% if form.description.errors %}
+                <ul class="error-list animate__animated animate__shakeX">
+                  {% for error in form.description.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <p class="help-text">Décrivez votre produit/service en détail (état, fonctionnalités, etc.)</p>
+            </div>
+          </div>
+          
+          <div class="section-navigation">
+            <button type="button" class="btn btn-nav btn-next" data-next="section-2">
+              Continuer <span class="btn-icon">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: Price and Category -->
+        <div class="form-section animate__animated animate__fadeIn" id="section-2">
+          <div class="section-header">
+            <h3 class="section-title">
+              <span class="section-icon">💰</span>
+              Prix et catégorie
+            </h3>
+            <button type="button" class="toggle-section" title="Réduire/Agrandir">
+              <span class="toggle-icon">−</span>
+            </button>
+          </div>
+          
+          <div class="section-content">
+            <div class="form-group animate__animated animate__fadeInUp animate__delay-1s">
+              {{ form.price.label_tag }}
+              <div class="input-container price-input">
+                {{ form.price|add_class:"form-control" }}
+                <span class="input-icon currency-icon">€</span>
+              </div>
+              {% if form.price.errors %}
+                <ul class="error-list animate__animated animate__shakeX">
+                  {% for error in form.price.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="price-slider">
+                <input type="range" min="0" max="10000" step="50" id="priceSlider" class="slider">
+                <div class="price-ranges">
+                  <button type="button" class="price-preset" data-value="100">100€</button>
+                  <button type="button" class="price-preset" data-value="500">500€</button>
+                  <button type="button" class="price-preset" data-value="1000">1000€</button>
+                  <button type="button" class="price-preset" data-value="5000">5000€</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group animate__animated animate__fadeInUp animate__delay-2s">
+              {{ form.category.label_tag }}
+              <div class="input-container">
+                {{ form.category|add_class:"form-control form-select" }}
+                <span class="input-icon">📂</span>
+              </div>
+              {% if form.category.errors %}
+                <ul class="error-list animate__animated animate__shakeX">
+                  {% for error in form.category.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+              <div class="category-chips">
+                <div class="chips-label">Catégories populaires:</div>
+                <div class="chips-container">
+                  <button type="button" class="category-chip" data-value="1">Tracteurs</button>
+                  <button type="button" class="category-chip" data-value="2">Outils</button>
+                  <button type="button" class="category-chip" data-value="3">Semences</button>
+                  <button type="button" class="category-chip" data-value="4">Services</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="section-navigation">
+            <button type="button" class="btn btn-nav btn-prev" data-prev="section-1">
+              <span class="btn-icon">←</span> Précédent
+            </button>
+            <button type="button" class="btn btn-nav btn-next" data-next="section-3">
+              Continuer <span class="btn-icon">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 3: Status and Options -->
+        <div class="form-section animate__animated animate__fadeIn" id="section-3">
+          <div class="section-header">
+            <h3 class="section-title">
+              <span class="section-icon">⚙️</span>
+              Statut et options
+            </h3>
+            <button type="button" class="toggle-section" title="Réduire/Agrandir">
+              <span class="toggle-icon">−</span>
+            </button>
+          </div>
+          
+          <div class="section-content">
+            <div class="form-group animate__animated animate__fadeInUp animate__delay-1s">
+              {{ form.status.label_tag }}
+              <div class="status-selector">
+                <div class="status-options">
+                  {% for value, text in form.status.field.choices %}
+                    <div class="status-option {% if form.status.value == value|stringformat:'s' %}active{% endif %}" data-value="{{ value }}">
+                      <div class="status-icon">
+                        {% if value == "draft" %}📝
+                        {% elif value == "published" %}🌐
+                        {% elif value == "archived" %}🗄️
+                        {% elif value == "sold" %}✅
+                        {% else %}❓
+                        {% endif %}
+                      </div>
+                      <div class="status-text">{{ text }}</div>
+                    </div>
+                  {% endfor %}
+                </div>
+                {{ form.status|add_class:"form-control form-select hidden-select" }}
+              </div>
+              {% if form.status.errors %}
+                <ul class="error-list animate__animated animate__shakeX">
+                  {% for error in form.status.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+            
+            <div class="form-group animate__animated animate__fadeInUp animate__delay-2s">
+              <div class="premium-toggle-container">
+                <div class="premium-info">
+                  <h4 class="premium-title">⭐ Annonce Premium</h4>
+                  <p class="premium-description">
+                    Les annonces premium sont mises en avant et bénéficient d'une visibilité accrue.
+                  </p>
+                  <ul class="premium-benefits">
+                    <li>🔝 Affichage en haut des résultats</li>
+                    <li>⚡ 5x plus de vues en moyenne</li>
+                    <li>🖼️ Galerie photos étendue</li>
+                    <li>📊 Statistiques détaillées de visites</li>
+                  </ul>
+                </div>
+                <div class="premium-toggle">
+                  <label class="switch">
+                    {{ form.is_premium }}
+                    <span class="slider round"></span>
+                    <span class="premium-price">+5€</span>
+                  </label>
+                </div>
+              </div>
+              {% if form.is_premium.errors %}
+                <ul class="error-list animate__animated animate__shakeX">
+                  {% for error in form.is_premium.errors %}
+                    <li>{{ error }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="section-navigation">
+            <button type="button" class="btn btn-nav btn-prev" data-prev="section-2">
+              <span class="btn-icon">←</span> Précédent
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions animate__animated animate__fadeInUp">
+        <div class="autosave-status">
+          <span class="autosave-icon">📌</span>
+          <span class="autosave-text">Modifications non enregistrées</span>
+        </div>
+        
+        <div class="action-buttons">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span class="btn-icon">💾</span>
+            <span class="btn-text">Mettre à jour</span>
+            <span class="btn-loader"></span>
+          </button>
+          <a href="{% url 'publicites:detail' advertisement.pk %}" class="btn btn-secondary">
+            <span class="btn-icon">❌</span>
+            <span class="btn-text">Annuler</span>
+          </a>
+        </div>
+      </div>
+    </form>
+
+    <!-- Floating help button -->
+    <button type="button" class="floating-help-btn" id="helpBtn">
+      <span class="help-icon">❓</span>
+    </button>
+
+    <!-- Help tooltip -->
+    <div class="help-tooltip" id="helpTooltip">
+      <div class="tooltip-header">
+        <h3>Conseils pour une bonne annonce</h3>
+        <button type="button" class="close-tooltip">&times;</button>
+      </div>
+      <div class="tooltip-content">
+        <ul class="help-tips">
+          <li>📏 Utilisez un titre concis et descriptif</li>
+          <li>📝 Détaillez l'état et les caractéristiques</li>
+          <li>💰 Indiquez un prix juste et compétitif</li>
+          <li>📸 Ajoutez des photos de qualité</li>
+          <li>🔍 Choisissez la bonne catégorie</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    /* Core Colors */
+    --primary: #3498db;
+    --primary-dark: #2980b9;
+    --primary-light: #5dade2;
+    --primary-gradient: linear-gradient(135deg, #3498db, #2980b9);
+    --secondary: #95a5a6;
+    --secondary-dark: #7f8c8d;
+    --secondary-light: #b2bec3;
+    --secondary-gradient: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    --success: #27ae60;
+    --success-dark: #219a52;
+    --danger: #e74c3c;
+    --danger-dark: #c0392b;
+    --warning: #f39c12;
+    --info: #2980b9;
+    
+    /* Text Colors */
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-muted: #95a5a6;
+    --text-light: #ecf0f1;
+    
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-light: #ecf0f1;
+    --bg-dark: #2c3e50;
+    
+    /* Elements */
+    --border-radius: 15px;
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.05);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 15px 50px rgba(0, 0, 0, 0.15);
+    --shadow-primary: 0 8px 30px rgba(52, 152, 219, 0.3);
+    --transition: all 0.3s ease;
+  }
+  
+  .dark {
+    --primary: #3498db;
+    --primary-dark: #2980b9;
+    --primary-light: #5dade2;
+    --primary-gradient: linear-gradient(135deg, #3498db, #2980b9);
+    
+    /* Text Colors */
+    --text-primary: #ecf0f1;
+    --text-secondary: #bdc3c7;
+    --text-muted: #95a5a6;
+    --text-light: #2c3e50;
+    
+    /* Background Colors */
+    --bg-primary: #2c3e50;
+    --bg-secondary: #34495e;
+    --bg-light: #375a7f;
+    --bg-dark: #1a252f;
+  }
+
+  .edit-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 3rem;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumb-container {
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb-item {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .breadcrumb-item:hover {
+    color: var(--primary);
+  }
+
+  .breadcrumb-item.active {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .separator {
+    color: var(--text-muted);
+  }
+
+  /* Page Header */
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--bg-light);
+  }
+
+  .page-title {
+    font-size: 2.2rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .edit-icon {
+    display: inline-block;
+    animation: bounce 2s ease infinite;
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Progress Bar */
+  .form-progress {
+    margin: 2rem 0;
+  }
+
+  .progress-container {
+    position: relative;
+    padding: 0 1rem;
+  }
+
+  .progress-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+    width: 0%;
+    transition: width 0.5s ease;
+    z-index: 1;
+  }
+
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+  }
+
+  .progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    width: 33.333%;
+    cursor: pointer;
+  }
+
+  .step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border: 2px solid var(--secondary);
+    transition: var(--transition);
+    position: relative;
+    z-index: 2;
+  }
+
+  .progress-step.active .step-circle {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: var(--primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 0 5px rgba(52, 152, 219, 0.2);
+  }
+
+  .progress-step.completed .step-circle {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+  }
+
+  .step-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    text-align: center;
+  }
+
+  .progress-step.active .step-label {
+    color: var(--primary);
+  }
+
+  /* Form Sections */
+  .form-sections-container {
+    position: relative;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary);
+    overflow: hidden;
+    display: none;
+  }
+
+  .form-section.active {
+    display: block;
+  }
+
+  .section-header {
+    padding: 1.5rem 2rem;
+    background: var(--bg-primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--bg-light);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .section-header:hover {
+    background: rgba(52, 152, 219, 0.05);
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-icon {
+    display: inline-block;
+    animation: pulse 2s ease infinite;
+  }
+
+  .toggle-section {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+  }
+
+  .toggle-section:hover {
+    background: var(--bg-light);
+    color: var(--primary);
+  }
+
+  .section-content {
+    padding: 2rem;
+    transition: var(--transition);
+  }
+
+  .section-collapsed .section-content {
+    display: none;
+  }
+
+  .section-collapsed .toggle-icon {
+    transform: rotate(180deg);
+  }
+
+  /* Form Groups */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .input-container {
+    position: relative;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 1rem 2.5rem 1rem 1rem;
+    border: 2px solid var(--bg-light);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    box-sizing: border-box;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .form-control.textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+    padding-right: 3.5rem;
+  }
+
+  .input-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    pointer-events: none;
+  }
+
+  .textarea-container .input-icon {
+    top: 1.5rem;
+    transform: none;
+  }
+
+  .character-count {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .character-count.limit-reached {
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px 12px;
+    padding-right: 3rem;
+  }
+
+  .hidden-select {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .help-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+
+  /* Text Editor Toolbar */
+  .text-editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .editor-btn {
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-light);
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-primary);
+  }
+
+  .editor-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .editor-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  /* Price Input */
+  .price-input .input-icon {
+    left: auto;
+    right: 1rem;
+  }
+
+  .price-slider {
+    margin-top: 1rem;
+  }
+
+  .slider {
+    width: 100%;
+    height: 5px;
+    background: var(--bg-light);
+    border-radius: 5px;
+    outline: none;
+    transition: var(--transition);
+    -webkit-appearance: none;
+  }
+
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+  }
+
+  .slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  .price-ranges {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.8rem;
+  }
+
+  .price-preset {
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-light);
+    border-radius: 20px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-primary);
+  }
+
+  .price-preset:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  /* Category Chips */
+  .category-chips {
+    margin-top: 1rem;
+  }
+
+  .chips-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .category-chip {
+    background: var(--bg-primary);
+    border: 1px solid var(--bg-light);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-primary);
+  }
+
+  .category-chip:hover, .category-chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Status Selector */
+  .status-selector {
+    margin-bottom: 1.5rem;
+  }
+
+  .status-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+
+  .status-option {
+    background: var(--bg-primary);
+    border: 2px solid var(--bg-light);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .status-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .status-option.active {
+    border-color: var(--primary);
+    background: rgba(52, 152, 219, 0.05);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .status-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .status-text {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* Premium Toggle */
+  .premium-toggle-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 2px solid var(--bg-light);
+    transition: var(--transition);
+  }
+
+  .premium-toggle-container:hover {
+    border-color: var(--warning);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(243, 156, 18, 0.2);
+  }
+
+  .premium-info {
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .premium-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .premium-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .premium-benefits {
+    padding-left: 1.5rem;
+    margin: 0;
+  }
+
+  .premium-benefits li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .premium-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Toggle Switch */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin: 0;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+  }
+
+  input:checked + .slider {
+    background-color: var(--warning);
+  }
+
+  input:focus + .slider {
+    box-shadow: 0 0 1px var(--warning);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+
+  .premium-price {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--warning);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* Error List */
+  .error-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .error-list li {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #dc3545;
+    font-size: 0.9rem;
+  }
+
+  /* Section Navigation */
+  .section-navigation {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bg-light);
+    margin-top: 2rem;
+  }
+
+  .btn-nav {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 2px solid var(--bg-light);
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-nav:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .btn-prev {
+    margin-right: auto;
+  }
+
+  .btn-next {
+    margin-left: auto;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--bg-light);
+  }
+
+  .autosave-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .autosave-icon {
+    animation: pulse 2s ease infinite;
+  }
+
+  .autosave-text.saved {
+    color: var(--success);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: var(--shadow-primary);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(52, 152, 219, 0.4);
+  }
+
+  .btn-secondary {
+    background: var(--secondary-gradient);
+    color: white;
+    box-shadow: 0 8px 30px rgba(149, 165, 166, 0.3);
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(149, 165, 166, 0.4);
+  }
+
+  .btn-loader {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+  }
+
+  .btn.loading .btn-text {
+    visibility: hidden;
+  }
+
+  .btn.loading .btn-loader {
+    display: block;
+    position: absolute;
+  }
+
+  /* Floating Help Button */
+  .floating-help-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-primary);
+    transition: var(--transition);
+    z-index: 100;
+  }
+
+  .floating-help-btn:hover {
+    transform: translateY(-5px) rotate(15deg);
+    box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4);
+  }
+
+  .help-icon {
+    animation: pulse 2s ease infinite;
+  }
+
+  /* Help Tooltip */
+  .help-tooltip {
+    position: fixed;
+    bottom: 6rem;
+    right: 2rem;
+    width: 300px;
+    background: var(--bg-primary);
+    border-radius: 15px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: var(--transition);
+  }
+
+  .help-tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .tooltip-header {
+    padding: 1rem;
+    background: var(--primary-gradient);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tooltip-header h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .close-tooltip {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .close-tooltip:hover {
+    transform: rotate(90deg);
+  }
+
+  .tooltip-content {
+    padding: 1rem;
+  }
+
+  .help-tips {
+    padding-left: 1.5rem;
+    margin: 0;
+  }
+
+  .help-tips li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .animate__animated {
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+  }
+
+  .animate__fadeIn {
+    animation-name: fadeIn;
+  }
+
+  .animate__fadeInUp {
+    animation-name: fadeIn;
+  }
+
+  .animate__fadeInDown {
+    animation-name: fadeIn;
+  }
+
+  .animate__delay-1s {
+    animation-delay: 0.1s;
+  }
+
+  .animate__delay-2s {
+    animation-delay: 0.2s;
+  }
+
+  .animate__shakeX {
+    animation-name: shakeX;
+  }
+
+  @keyframes shakeX {
+    from, to { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+
+  /* Media Queries */
+  @media (max-width: 768px) {
+    .edit-container {
+      margin: 1rem;
+      padding: 1.5rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .step-label {
+      font-size: 0.7rem;
+    }
+    
+    .premium-toggle-container {
+      flex-direction: column;
+    }
+    
+    .premium-toggle {
+      align-self: flex-start;
+    }
+    
+    .floating-help-btn {
+      bottom: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+    }
+    
+    .help-tooltip {
+      bottom: 5rem;
+      right: 1rem;
+      width: calc(100% - 2rem);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Enable dark mode based on user preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+  
+    // Get DOM elements
+    const form = document.getElementById('editForm');
+    const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+    const descInput = document.getElementById('{{ form.description.id_for_label }}');
+    const priceInput = document.getElementById('{{ form.price.id_for_label }}');
+    const priceSlider = document.getElementById('priceSlider');
+    const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+    const statusSelect = document.getElementById('{{ form.status.id_for_label }}');
+    const isPremiumCheck = document.getElementById('{{ form.is_premium.id_for_label }}');
+    const titleCharCount = document.getElementById('titleCharCount');
+    const descCharCount = document.getElementById('descCharCount');
+    const progressBar = document.getElementById('progressBar');
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const sections = document.querySelectorAll('.form-section');
+    const toggleSectionBtns = document.querySelectorAll('.toggle-section');
+    const nextBtns = document.querySelectorAll('.btn-next');
+    const prevBtns = document.querySelectorAll('.btn-prev');
+    const categoryChips = document.querySelectorAll('.category-chip');
+    const pricePresets = document.querySelectorAll('.price-preset');
+    const statusOptions = document.querySelectorAll('.status-option');
+    const submitBtn = document.getElementById('submitBtn');
+    const autosaveText = document.querySelector('.autosave-text');
+    const editorBtns = document.querySelectorAll('.editor-btn');
+    const helpBtn = document.getElementById('helpBtn');
+    const helpTooltip = document.getElementById('helpTooltip');
+    const closeTooltip = document.querySelector('.close-tooltip');
+    
+    // Initialize character counters
+    if (titleInput) {
+      titleCharCount.textContent = titleInput.value.length;
+      titleInput.addEventListener('input', function() {
+        titleCharCount.textContent = this.value.length;
+        if (this.value.length >= 100) {
+          titleCharCount.parentElement.classList.add('limit-reached');
+        } else {
+          titleCharCount.parentElement.classList.remove('limit-reached');
+        }
+        updateAutosaveStatus('non enregistrées');
+      });
+    }
+    
+    if (descInput) {
+      descCharCount.textContent = descInput.value.length;
+      descInput.addEventListener('input', function() {
+        descCharCount.textContent = this.value.length;
+        if (this.value.length >= 1000) {
+          descCharCount.parentElement.classList.add('limit-reached');
+        } else {
+          descCharCount.parentElement.classList.remove('limit-reached');
+        }
+        updateAutosaveStatus('non enregistrées');
+      });
+    }
+    
+    // Initialize price slider
+    if (priceInput && priceSlider) {
+      priceSlider.value = priceInput.value || 0;
+      priceSlider.addEventListener('input', function() {
+        priceInput.value = this.value;
+        updateAutosaveStatus('non enregistrées');
+      });
+      
+      priceInput.addEventListener('input', function() {
+        priceSlider.value = this.value;
+        updateAutosaveStatus('non enregistrées');
+      });
+      
+      // Price presets
+      pricePresets.forEach(preset => {
+        preset.addEventListener('click', function() {
+          const value = this.getAttribute('data-value');
+          priceInput.value = value;
+          priceSlider.value = value;
+          
+          // Animate the button
+          this.classList.add('animate__animated', 'animate__pulse');
+          setTimeout(() => {
+            this.classList.remove('animate__animated', 'animate__pulse');
+          }, 500);
+          
+          updateAutosaveStatus('non enregistrées');
+        });
+      });
+    }
+    
+    // Section toggles
+    toggleSectionBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const section = this.closest('.form-section');
+        section.classList.toggle('section-collapsed');
+        
+        if (section.classList.contains('section-collapsed')) {
+          this.querySelector('.toggle-icon').textContent = '+';
+        } else {
+          this.querySelector('.toggle-icon').textContent = '−';
+        }
+      });
+    });
+    
+    // Navigation between sections
+    function showSection(sectionId) {
+      // Hide all sections
+      sections.forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Show the target section
+      const targetSection = document.getElementById(sectionId);
+      targetSection.classList.add('active');
+      
+      // Update progress steps
+      updateProgressSteps(sectionId);
+      
+      // Scroll to top of the section
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    function updateProgressSteps(currentSectionId) {
+      let currentIndex = parseInt(currentSectionId.split('-')[1]) - 1;
+      let progressWidth = (currentIndex / (progressSteps.length - 1)) * 100;
+      
+      progressBar.style.width = `${progressWidth}%`;
+      
+      progressSteps.forEach((step, index) => {
+        if (index <= currentIndex) {
+          step.classList.add('active');
+          if (index < currentIndex) {
+            step.classList.add('completed');
+          } else {
+            step.classList.remove('completed');
+          }
+        } else {
+          step.classList.remove('active', 'completed');
+        }
+      });
+    }
+    
+    nextBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const nextSection = this.getAttribute('data-next');
+        showSection(nextSection);
+      });
+    });
+    
+    prevBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const prevSection = this.getAttribute('data-prev');
+        showSection(prevSection);
+      });
+    });
+    
+    // Click on progress steps to navigate
+    progressSteps.forEach(step => {
+      step.addEventListener('click', function() {
+        const sectionId = this.getAttribute('data-section');
+        showSection(sectionId);
+      });
+    });
+    
+    // Category chips
+    categoryChips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        categorySelect.value = value;
+        
+        // Update active state
+        categoryChips.forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        
+        updateAutosaveStatus('non enregistrées');
+      });
+      
+      // Set initial active state
+      if (categorySelect && chip.getAttribute('data-value') === categorySelect.value) {
+        chip.classList.add('active');
+      }
+    });
+    
+    // Status options
+    statusOptions.forEach(option => {
+      option.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        statusSelect.value = value;
+        
+        // Update active state
+        statusOptions.forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Add animation
+        this.classList.add('animate__animated', 'animate__pulse');
+        setTimeout(() => {
+          this.classList.remove('animate__animated', 'animate__pulse');
+        }, 500);
+        
+        updateAutosaveStatus('non enregistrées');
+      });
+    });
+    
+    // Text editor toolbar
+    editorBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const format = this.getAttribute('data-format');
+        const textarea = descInput;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+        let replacement = '';
+        
+        switch(format) {
+          case 'bold':
+            replacement = `**${selectedText}**`;
+            break;
+          case 'italic':
+            replacement = `*${selectedText}*`;
+            break;
+          case 'underline':
+            replacement = `_${selectedText}_`;
+            break;
+          case 'list':
+            replacement = `\n- ${selectedText.split('\n').join('\n- ')}`;
+            break;
+        }
+        
+        textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+        textarea.focus();
+        textarea.selectionStart = start;
+        textarea.selectionEnd = start + replacement.length;
+        
+        updateAutosaveStatus('non enregistrées');
+        
+        // Update character count
+        descCharCount.textContent = textarea.value.length;
+      });
+    });
+    
+    // Help tooltip
+    helpBtn.addEventListener('click', function() {
+      helpTooltip.classList.toggle('visible');
+    });
+    
+    closeTooltip.addEventListener('click', function() {
+      helpTooltip.classList.remove('visible');
+    });
+    
+    document.addEventListener('click', function(e) {
+      if (!helpTooltip.contains(e.target) && e.target !== helpBtn) {
+        helpTooltip.classList.remove('visible');
+      }
+    });
+    
+    // Form submission
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.classList.add('loading');
+        
+        // Simulate form validation (in a real app, this would be server-side)
+        const requiredFields = [titleInput, descInput, priceInput, categorySelect];
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+          if (!field.value.trim()) {
+            field.classList.add('error');
+            isValid = false;
+          } else {
+            field.classList.remove('error');
+          }
+        });
+        
+        if (!isValid) {
+          e.preventDefault();
+          
+          // Show validation message
+          alert('Veuillez remplir tous les champs obligatoires.');
+          
+          // Reset loading state
+          submitBtn.classList.remove('loading');
+          
+          return false;
+        }
+        
+        // Continue with form submission
+        updateAutosaveStatus('enregistrées');
+      });
+    }
+    
+    // Auto-save status updates
+    function updateAutosaveStatus(status) {
+      autosaveText.textContent = `Modifications ${status}`;
+      if (status === 'enregistrées') {
+        autosaveText.classList.add('saved');
+      } else {
+        autosaveText.classList.remove('saved');
+      }
+    }
+    
+    // Simulate autosave
+    let autosaveTimeout;
+    const autosave = () => {
+      // In a real app, this would send an AJAX request to save the form data
+      updateAutosaveStatus('sauvegarde en cours...');
+      
+      // Simulate network delay
+      setTimeout(() => {
+        updateAutosaveStatus('enregistrées automatiquement');
+        
+        // Reset status after a few seconds
+        setTimeout(() => {
+          updateAutosaveStatus('non enregistrées');
+        }, 3000);
+      }, 1000);
+    };
+    
+    // Add input event listeners to all form fields for autosave
+    const formInputs = form.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        clearTimeout(autosaveTimeout);
+        autosaveTimeout = setTimeout(autosave, 2000);
+      });
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+      // Find the currently active section
+      const activeSection = document.querySelector('.form-section.active');
+      if (!activeSection) return;
+      
+      const sectionId = activeSection.id;
+      const sectionNumber = parseInt(sectionId.split('-')[1]);
+      
+      // Next section: Alt + Right Arrow
+      if (e.altKey && e.key === 'ArrowRight') {
+        const nextSection = `section-${sectionNumber + 1}`;
+        const nextSectionEl = document.getElementById(nextSection);
+        if (nextSectionEl) {
+          e.preventDefault();
+          showSection(nextSection);
+        }
+      }
+      
+      // Previous section: Alt + Left Arrow
+      if (e.altKey && e.key === 'ArrowLeft') {
+        const prevSection = `section-${sectionNumber - 1}`;
+        const prevSectionEl = document.getElementById(prevSection);
+        if (prevSectionEl) {
+          e.preventDefault();
+          showSection(prevSection);
+        }
+      }
+      
+      // Submit form: Alt + Enter
+      if (e.altKey && e.key === 'Enter') {
+        e.preventDefault();
+        submitBtn.click();
+      }
+    });
+    
+    // Initialize with first section visible
+    showSection('section-1');
+  });
+</script>
+{% endblock %}

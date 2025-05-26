@@ -1,0 +1,103 @@
+{% extends "ads/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h2 class="mb-4">Créer une nouvelle annonce</h2>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="card mb-4">
+                    <div class="card-header">Informations de base</div>
+                    <div class="card-body">
+                        {{ form.non_field_errors }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            <div class="text-danger">{{ form.title.errors }}</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.category.label_tag }}
+                                {{ form.category }}
+                                <div class="text-danger">{{ form.category.errors }}</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.price.label_tag }}
+                                {{ form.price }}
+                                <div class="text-danger">{{ form.price.errors }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.location.label_tag }}
+                            {{ form.location }}
+                            <div class="text-danger">{{ form.location.errors }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">Dates de campagne</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.campaign_start.label_tag }}
+                                {{ form.campaign_start }}
+                                <div class="text-danger">{{ form.campaign_start.errors }}</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.campaign_end.label_tag }}
+                                {{ form.campaign_end }}
+                                <div class="text-danger">{{ form.campaign_end.errors }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">Images (max 10)</div>
+                    <div class="card-body">
+                        {{ formset.management_form }}
+                        {% for image_form in formset %}
+                            <div class="image-form mb-3 p-2 border rounded">
+                                {{ image_form.id }}
+                                <div class="mb-2">
+                                    {{ image_form.image.label_tag }}
+                                    {{ image_form.image }}
+                                    <div class="text-danger">{{ image_form.image.errors }}</div>
+                                </div>
+                                <div class="form-check">
+                                    {{ image_form.is_primary }}
+                                    {{ image_form.is_primary.label_tag }}
+                                </div>
+                                {% if image_form.instance.pk %}
+                                    <div class="mt-2">
+                                        <img src="{{ image_form.instance.image.url }}" alt="Current image" class="img-thumbnail" style="max-height: 100px;">
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'ads:ad_list' %}" class="btn btn-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Publier l'annonce</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

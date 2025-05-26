@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Annonce Expirant Bientôt</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #FFA500; color: white; padding: 10px; text-align: center; }
+        .content { padding: 20px; border: 1px solid #ddd; }
+        .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #777; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #FFA500; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Annonce Expirant Bientôt</h1>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour {{ ad.author.username }},</p>
+            
+            <p>Votre annonce <strong>"{{ ad.title }}"</strong> expirera dans {{ days_remaining }} jours (le {{ ad.campaign_end|date:"d/m/Y" }}).</p>
+            
+            <p><strong>Statistiques de votre annonce :</strong></p>
+            <ul>
+                <li>Vues : {{ ad.views_count }}</li>
+                <li>Note moyenne : {{ ad.average_rating|default:"Pas encore noté" }}</li>
+            </ul>
+            
+            <p>Si vous souhaitez prolonger la durée de votre annonce, vous pouvez la renouveler dès maintenant.</p>
+            
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="{{ site_url }}{% url 'ads:update_ad' ad.pk %}" class="btn">
+                    Renouveler mon annonce
+                </a>
+            </div>
+            
+            <p>Après expiration, votre annonce ne sera plus visible par les utilisateurs.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+            <p>&copy; {% now "Y" %} {{ site_name }}. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

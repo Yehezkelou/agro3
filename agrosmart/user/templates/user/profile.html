@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSmart - Mon Profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .publication-card {
+            transition: all 0.2s ease;
+        }
+        .publication-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+        .modal-content {
+            margin: 2rem auto;
+            max-width: 90%;
+            width: 700px;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-out;
+        }
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .dark .modal-content {
+            background-color: #1f2937;
+        }
+        body.modal-open {
+            overflow: hidden;
+        }
+    </style>
+    <script>
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <svg class="h-10 w-10 text-primary-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3C17.5228 3 22 7.47715 22 13C22 18.5228 17.5228 23 12 23C6.47715 23 2 18.5228 2 13C2 7.47715 6.47715 3 12 3Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V13L15 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 4C7 2.89543 7.89543 2 9 2H15C16.1046 2 17 2.89543 17 4V5H7V4Z" fill="currentColor"/>
+                </svg>
+                <h1 class="ml-2 text-2xl font-bold text-primary-600 dark:text-primary-400">AgroSmart</h1>
+            </div>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="{% url 'publicites:home' %}" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Accueil</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Ressources</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Communauté</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        <!-- Notifications -->
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md mb-4 {% if message.tags == 'error' %}bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200{% elif message.tags == 'success' %}bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200{% else %}bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <!-- Profile Header -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <div class="flex-shrink-0 relative group">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="Photo de profil" class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white dark:border-gray-700 shadow-md">
+                        {% else %}
+                            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center border-4 border-white dark:border-gray-700 shadow-md">
+                                <svg class="w-20 h-20 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'users:change_picture' %}" class="absolute bottom-0 right-0 bg-primary-600 text-white p-2 rounded-full shadow-lg hover:bg-primary-700 transition opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0" title="Changer la photo de profil">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    
+                    <div class="text-center md:text-left flex-1">
+                        <h1 class="text-2xl md:text-3xl font-bold">{{ user.first_name|default:user.username }} {{ user.last_name }}</h1>
+                        <p class="text-gray-600 dark:text-gray-400 mb-2">@{{ user.username }} • {{ user.get_user_type_display }}</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Membre depuis {{ user.date_joined|date:"d/m/Y" }}</p>
+                        
+                        <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+                            <a href="{% url 'users:edit_profile' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Modifier le profil
+                            </a>
+                            
+                            <a href="{% url 'users:change_password' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                                </svg>
+                                Changer le mot de passe
+                            </a>
+                            
+                            <a href="{% url 'users:public_profile' user.username %}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Voir profil public
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profile Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left Column - Personal Info -->
+                <div class="md:col-span-1">
+                    <!-- Personal Information Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Informations personnelles</h2>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Nom d'utilisateur</p>
+                                <p class="mt-1">{{ user.username }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</p>
+                                <p class="mt-1">{{ user.email }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Prénom</p>
+                                <p class="mt-1">{{ user.first_name|default:"Non renseigné" }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Nom</p>
+                                <p class="mt-1">{{ user.last_name|default:"Non renseigné" }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Type d'utilisateur</p>
+                                <p class="mt-1">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-300">
+                                        {{ user.get_user_type_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bio Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Profil</h2>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Biographie</p>
+                                <p class="mt-1">{{ profile.bio|default:"Aucune biographie" }}</p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Site web</p>
+                                <p class="mt-1">
+                                    {% if profile.website %}
+                                        <a href="{{ profile.website }}" target="_blank" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">
+                                            {{ profile.website }}
+                                        </a>
+                                    {% else %}
+                                        Non renseigné
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Localisation</p>
+                                <p class="mt-1">{{ profile.location|default:"Non renseignée" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Actions Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Actions du compte</h2>
+                        
+                        <div class="space-y-3">
+                            <a href="{% url 'users:logout' %}" class="flex items-center py-2 px-4 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                <svg class="w-5 h-5 mr-3 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Se déconnecter
+                            </a>
+                            
+                            <button id="deleteAccountBtn" class="w-full text-left flex items-center py-2 px-4 rounded-md hover:bg-red-50 dark:hover:bg-red-900 text-red-600 dark:text-red-400 transition">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Supprimer le compte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Publications -->
+                <div class="md:col-span-2">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Mes Publications</h2>
+                            <a href="#" class="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium">
+                                Créer une publication
+                            </a>
+                        </div>
+                        
+                        <!-- Publications Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Sample Publication 1 -->
+                            <div class="publication-card bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm cursor-pointer" data-publication-id="1">
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600">
+                                    <div class="w-full h-48 flex items-center justify-center bg-primary-100 dark:bg-primary-900">
+                                        <svg class="w-16 h-16 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-semibold mb-1 truncate">Techniques de rotation des cultures</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">Comment j'ai optimisé mes rotations de cultures pour améliorer la fertilité du sol et réduire les problèmes de parasites.</p>
+                                    <div class="mt-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Il y a 2 jours</span>
+                                        <span class="inline-flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            24
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sample Publication 2 -->
+                            <div class="publication-card bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm cursor-pointer" data-publication-id="2">
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600">
+                                    <div class="w-full h-48 flex items-center justify-center bg-primary-100 dark:bg-primary-900">
+                                        <svg class="w-16 h-16 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-semibold mb-1 truncate">Mon système d'irrigation goutte-à-goutte</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">J'ai installé un système d'irrigation économique qui a réduit ma consommation d'eau de 40%. Voici comment je l'ai fait...</p>
+                                    <div class="mt-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Il y a 1 semaine</span>
+                                        <span class="inline-flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            36
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sample Publication 3 -->
+                            <div class="publication-card bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm cursor-pointer" data-publication-id="3">
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600">
+                                    <div class="w-full h-48 flex items-center justify-center bg-primary-100 dark:bg-primary-900">
+                                        <svg class="w-16 h-16 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-semibold mb-1 truncate">Préparation du compost organique</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">Recette de compost maison que j'utilise pour améliorer la qualité de mon sol. Résultats après 6 mois d'utilisation.</p>
+                                    <div class="mt-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Il y a 2 semaines</span>
+                                        <span class="inline-flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            19
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sample Publication 4 -->
+                            <div class="publication-card bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden shadow-sm cursor-pointer" data-publication-id="4">
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-600">
+                                    <div class="w-full h-48 flex items-center justify-center bg-primary-100 dark:bg-primary-900">
+                                        <svg class="w-16 h-16 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-semibold mb-1 truncate">Guide des engrais naturels</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">Comparaison des différents engrais naturels que j'ai testés cette saison sur mes cultures maraîchères.</p>
+                                    <div class="mt-2 flex justify-between items-center">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Il y a 1 mois</span>
+                                        <span class="inline-flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                                            </svg>
+                                            42
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <div class="flex-1 flex justify-between sm:hidden">
+                                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    Précédent
+                                </a>
+                                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    Suivant
+                                </a>
+                            </div>
+                            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                                        Affichage de <span class="font-medium">1</span> à <span class="font-medium">4</span> sur <span class="font-medium">12</span> résultats
+                                    </p>
+                                </div>
+                                <div>
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            <span class="sr-only">Précédent</span>
+                                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                        </a>
+                                        <a href="#" aria-current="page" class="z-10 bg-primary-50 dark:bg-primary-900 border-primary-500 dark:border-primary-500 text-primary-600 dark:text-primary-300 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            1
+                                        </a>
+                                        <a href="#" class="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            2
+                                        </a>
+                                        <a href="#" class="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            3
+                                        </a>
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            ...
+                                        </span>
+                                        <a href="#" class="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                            8
+                                        </a>
+                                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                            <span class="sr-only">Suivant</span>
+                                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                        </a>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white dark:bg-gray-800 mt-8 pt-8 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-wrap justify-between">
+                <div class="w-full md:w-1/4 mb-6 md:mb-0">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">AgroSmart</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Transformons l'agriculture ensemble pour un avenir meilleur et plus durable.</p>
+                </div>
+                <div class="w-full md:w-1/4 mb-6 md:mb-0">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Liens Rapides</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Accueil</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">À propos</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Services</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/4 mb-6 md:mb-0">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Légal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Conditions d'utilisation</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Politique de confidentialité</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Cookies</a></li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/4">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Nous Suivre</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                            <span class="sr-only">Facebook</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                            <span class="sr-only">Instagram</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6 text-center">
+                <p class="text-sm text-gray-500 dark:text-gray-400">© 2023 AgroSmart. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Delete Account Modal -->
+    <div id="deleteAccountModal" class="modal">
+        <div class="modal-content p-6 md:p-8">
+            <div class="flex justify-between items-start">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Supprimer votre compte</h3>
+                <button id="closeDeleteModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 transition">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mt-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et toutes vos données seront définitivement supprimées.
+                </p>
+                
+                <form method="post" action="{% url 'users:delete_account' %}" class="mt-4">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Confirmez avec votre mot de passe
+                        </label>
+                        <input type="password" name="password" id="password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                    </div>
+                    
+                    <div class="flex justify-end gap-3">
+                        <button type="button" id="cancelDeleteAccount" class="inline-flex justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Annuler
+                        </button>
+                        <button type="submit" class="inline-flex justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            Supprimer définitivement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Publication Detail Modal -->
+    <div id="publicationModal" class="modal">
+        <div class="modal-content max-w-4xl p-0">
+            <div class="flex flex-col md:flex-row">
+                <!-- Publication Image Section (Left/Top) -->
+                <div class="md:w-1/2 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <div class="w-full h-64 md:h-full flex items-center justify-center bg-primary-100 dark:bg-primary-900">
+                        <svg class="w-24 h-24 text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Publication Content Section (Right/Bottom) -->
+                <div class="md:w-1/2 p-6 flex flex-col">
+                    <div class="flex justify-between items-start">
+                        <h3 id="publicationTitle" class="text-xl font-semibold text-gray-900 dark:text-white"></h3>
+                        <button id="closePublicationModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200 transition">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-2 text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <span id="publicationDate"></span>
+                        <span class="mx-2">•</span>
+                        <span class="inline-flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span id="publicationLikes"></span>
+                        </span>
+                    </div>
+                    
+                    <div class="mt-4 flex-grow">
+                        <p id="publicationContent" class="text-gray-700 dark:text-gray-300"></p>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between">
+                            <button class="inline-flex items-center text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                J'aime
+                            </button>
+                            
+                            <button class="inline-flex items-center text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                Commenter
+                            </button>
+                            
+                            <button class="inline-flex items-center text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                Partager
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modal functionality for delete account
+            const deleteAccountModal = document.getElementById('deleteAccountModal');
+            const deleteAccountBtn = document.getElementById('deleteAccountBtn');
+            const closeDeleteModal = document.getElementById('closeDeleteModal');
+            const cancelDeleteAccount = document.getElementById('cancelDeleteAccount');
+            
+            deleteAccountBtn.addEventListener('click', () => {
+                deleteAccountModal.classList.add('show');
+                deleteAccountModal.style.display = 'block';
+                document.body.classList.add('modal-open');
+            });
+            
+            function closeDeleteAccountModal() {
+                deleteAccountModal.classList.remove('show');
+                setTimeout(() => {
+                    deleteAccountModal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                }, 300);
+            }
+            
+            closeDeleteModal.addEventListener('click', closeDeleteAccountModal);
+            cancelDeleteAccount.addEventListener('click', closeDeleteAccountModal);
+            
+            // Publication modal functionality
+            const publicationModal = document.getElementById('publicationModal');
+            const closePublicationModal = document.getElementById('closePublicationModal');
+            const publicationCards = document.querySelectorAll('.publication-card');
+            
+            // Sample publication data (in a real app, this would come from your database)
+            const publicationData = {
+                "1": {
+                    title: "Techniques de rotation des cultures",
+                    content: "La rotation des cultures est une pratique agricole ancestrale qui consiste à alterner différentes cultures sur une même parcelle au fil des saisons. J'ai mis en place un système de rotation sur 4 ans qui inclut des légumineuses, des céréales, des légumes-racines et des légumes-feuilles.\n\nVoici les principaux avantages que j'ai constatés:\n\n1. Amélioration significative de la fertilité du sol\n2. Réduction de 60% des problèmes liés aux parasites\n3. Meilleure utilisation des nutriments du sol\n4. Contrôle naturel des mauvaises herbes\n5. Augmentation des rendements de près de 30%\n\nJ'ai également remarqué que l'introduction de cultures de couverture pendant les périodes de repos a permis de réduire l'érosion et d'améliorer la structure du sol.",
+                    date: "Il y a 2 jours",
+                    likes: 24
+                },
+                "2": {
+                    title: "Mon système d'irrigation goutte-à-goutte",
+                    content: "Après avoir constaté une augmentation des périodes de sécheresse dans ma région, j'ai décidé d'investir dans un système d'irrigation goutte-à-goutte pour optimiser ma consommation d'eau.\n\nJ'ai utilisé des matériaux relativement abordables: tuyaux en polyéthylène, goutteurs régulateurs de pression, et un système de filtration simple. L'installation complète m'a coûté environ 500€ pour 1 hectare.\n\nLes résultats sont impressionnants:\n- Réduction de 40% de ma consommation d'eau\n- Moins de maladies foliaires (car les feuilles restent sèches)\n- Croissance plus régulière des plantes\n- Moins de mauvaises herbes (car seules les zones cultivées sont irriguées)\n\nJe complète ce système avec des capteurs d'humidité du sol pour déclencher l'irrigation uniquement lorsque c'est nécessaire, ce qui optimise encore davantage l'utilisation de l'eau.",
+                    date: "Il y a 1 semaine",
+                    likes: 36
+                },
+                "3": {
+                    title: "Préparation du compost organique",
+                    content: "Je fabrique mon propre compost depuis plusieurs années et j'ai perfectionné une recette qui donne d'excellents résultats. Voici les ingrédients et proportions que j'utilise:\n\n- 40% de matières brunes (feuilles mortes, paille, copeaux de bois)\n- 40% de matières vertes (déchets de cuisine, tontes de gazon)\n- 10% de fumier (de préférence de cheval ou de vache)\n- 10% de terre de jardin\n\nLe secret d'un bon compost est l'équilibre entre les matières azotées (vertes) et carbonées (brunes), ainsi qu'une bonne aération et humidité.\n\nAprès 6 mois d'utilisation de ce compost, j'ai constaté:\n- Une augmentation de l'activité biologique dans mon sol\n- Des plantes plus résistantes aux maladies\n- Une meilleure rétention d'eau\n- Des légumes au goût plus prononcé\n\nJe retourne le tas tous les 15 jours pour accélérer la décomposition et j'obtiens un compost mature en 4-6 mois selon la saison.",
+                    date: "Il y a 2 semaines",
+                    likes: 19
+                },
+                "4": {
+                    title: "Guide des engrais naturels",
+                    content: "Cette année, j'ai testé différents engrais naturels sur mes cultures maraîchères. Voici mon évaluation comparative:\n\n1. Purins de plantes:\n   - Ortie: excellent pour la croissance végétative\n   - Consoude: riche en potassium, idéal pour la floraison/fructification\n   - Prêle: renforce la résistance aux maladies\n\n2. Fumiers compostés:\n   - Cheval: bon équilibre NPK, se décompose rapidement\n   - Volaille: très riche en azote, à utiliser avec parcimonie\n   - Mouton: libération lente des nutriments, idéal pour les cultures à long terme\n\n3. Amendements minéraux naturels:\n   - Cendres de bois: apport de potassium et calcium\n   - Algues marines: riches en oligoéléments\n   - Poudre de basalte: reminéralisation progressive\n\nLes meilleurs résultats ont été obtenus avec une combinaison de compost de base enrichi de purins d'ortie pour les légumes-feuilles et de consoude pour les légumes-fruits.",
+                    date: "Il y a 1 mois",
+                    likes: 42
+                }
+            };
+            
+            // Open publication modal with details when a publication card is clicked
+            publicationCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const publicationId = card.getAttribute('data-publication-id');
+                    const publication = publicationData[publicationId];
+                    
+                    // Fill in the publication details
+                    document.getElementById('publicationTitle').textContent = publication.title;
+                    document.getElementById('publicationDate').textContent = publication.date;
+                    document.getElementById('publicationLikes').textContent = publication.likes;
+                    document.getElementById('publicationContent').textContent = publication.content;
+                    
+                    // Show the modal
+                    publicationModal.classList.add('show');
+                    publicationModal.style.display = 'block';
+                    document.body.classList.add('modal-open');
+                });
+            });
+            
+            function closePublicationDetailModal() {
+                publicationModal.classList.remove('show');
+                setTimeout(() => {
+                    publicationModal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                }, 300);
+            }
+            
+            closePublicationModal.addEventListener('click', closePublicationDetailModal);
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === deleteAccountModal) {
+                    closeDeleteAccountModal();
+                }
+                if (e.target === publicationModal) {
+                    closePublicationDetailModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<footer class="bg-dark text-white pt-5 pb-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-tree-fill me-2"></i> AgriConnect Pro
+                </h5>
+                <p>
+                    La plateforme professionnelle pour les acteurs du monde agricole.
+                    Connectez-vous avec des milliers d'agriculteurs et professionnels du secteur.
+                </p>
+                <div class="social-icons">
+                    <a href="#" class="text-white me-3"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-linkedin"></i></a>
+                    <a href="#" class="text-white"><i class="bi bi-instagram"></i></a>
+                </div>
+            </div>
+            
+            <div class="col-lg-2 col-md-4 mb-4">
+                <h5 class="fw-bold mb-3">Navigation</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'core:home' %}" class="text-white text-decoration-none">Accueil</a></li>
+                    <li class="mb-2"><a href="{% url 'ads:ad_list' %}" class="text-white text-decoration-none">Annonces</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Catégories</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Contact</a></li>
+                    <li><a href="#" class="text-white text-decoration-none">À propos</a></li>
+                </ul>
+            </div>
+            
+            <div class="col-lg-3 col-md-4 mb-4">
+                <h5 class="fw-bold mb-3">Catégories</h5>
+                <ul class="list-unstyled">
+                    {% for category in categories|slice:":5" %}
+                        <li class="mb-2">
+                            <a href="{% url 'ads:ad_list' %}?category={{ category.id }}" class="text-white text-decoration-none">
+                                <i class="bi {{ category.icon }} me-1"></i> {{ category.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="col-lg-3 col-md-4 mb-4">
+                <h5 class="fw-bold mb-3">Contact</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-geo-alt me-2"></i> 123 Rue Agricole, 75000 Paris
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-telephone me-2"></i> +33 1 23 45 67 89
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-envelope me-2"></i> contact@agriconnectpro.fr
+                    </li>
+                    <li>
+                        <i class="bi bi-clock me-2"></i> Lun-Ven: 9h-18h
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0">&copy; 2023 AgriConnect Pro. Tous droits réservés.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <a href="#" class="text-white text-decoration-none me-3">Mentions légales</a>
+                <a href="#" class="text-white text-decoration-none me-3">CGU</a>
+                <a href="#" class="text-white text-decoration-none">Politique de confidentialité</a>
+            </div>
+        </div>
+    </div>
+</footer>

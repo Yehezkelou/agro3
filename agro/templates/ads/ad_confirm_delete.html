@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer l'annonce{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h3>Confirmer la suppression</h3>
+            </div>
+            <div class="card-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'annonce suivante ?</p>
+                
+                <div class="alert alert-info">
+                    <h5>{{ ad.title }}</h5>
+                    <p>{{ ad.description|truncatewords:20 }}</p>
+                    <small class="text-muted">Créée le {{ ad.created_at|date:"d/m/Y" }}</small>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>Attention :</strong> Cette action est irréversible.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'ads:ad_detail' ad.pk %}" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

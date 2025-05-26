@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier le statut - {{ ad.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1>Modifier le statut de l'annonce</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>{{ ad.title }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        {% if ad.images.all %}
+                            <img src="{{ ad.images.all.0.image.url }}" class="img-fluid rounded" alt="{{ ad.title }}">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9">
+                        <p><strong>Auteur:</strong> {{ ad.author.get_full_name|default:ad.author.username }}</p>
+                        <p><strong>Catégorie:</strong> {{ ad.category.name }}</p>
+                        <p><strong>Localisation:</strong> {{ ad.location }}</p>
+                        <p><strong>Date de création:</strong> {{ ad.created_at|date:"d/m/Y à H:i" }}</p>
+                        {% if ad.price %}
+                            <p><strong>Prix:</strong> {{ ad.price }} €</p>
+                        {% endif %}
+                        <p><strong>Description:</strong></p>
+                        <p>{{ ad.description|truncatewords:50 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Modifier le statut</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="text-danger">
+                                {{ form.status.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_featured }}
+                            <label class="form-check-label" for="{{ form.is_featured.id_for_label }}">
+                                {{ form.is_featured.label }}
+                            </label>
+                        </div>
+                        {% if form.is_featured.errors %}
+                            <div class="text-danger">
+                                {{ form.is_featured.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                        <a href="{% url 'ads:admin_ads' %}" class="btn btn-secondary">Retour à la liste</a>
+                        <a href="{% url 'ads:ad_detail' ad.pk %}" class="btn btn-outline-primary">Voir l'annonce</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Statistiques</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Vues:</strong> {{ ad.views_count }}</p>
+                <p><strong>Statut actuel:</strong> 
+                    {% if ad.status == 'pending' %}
+                        <span class="badge bg-warning">En attente</span>
+                    {% elif ad.status == 'approved' %}
+                        <span class="badge bg-success">Approuvée</span>
+                    {% elif ad.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejetée</span>
+                    {% elif ad.status == 'expired' %}
+                        <span class="badge bg-secondary">Expirée</span>
+                    {% endif %}
+                </p>
+                <p><strong>En vedette:</strong> 
+                    {% if ad.is_featured %}
+                        <span class="badge bg-warning text-dark">⭐ Oui</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Non</span>
+                    {% endif %}
+                </p>
+                <p><strong>Période de campagne:</strong></p>
+                <p class="small">
+                    Du {{ ad.campaign_start|date:"d/m/Y" }}<br>
+                    Au {{ ad.campaign_end|date:"d/m/Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

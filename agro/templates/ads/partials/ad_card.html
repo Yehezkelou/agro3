@@ -1,0 +1,49 @@
+<div class="card h-100">
+    {% if ad.images.all %}
+    <img src="{{ ad.images.first.image.url }}" class="card-img-top" alt="{{ ad.title }}" style="height: 200px; object-fit: cover;">
+    {% else %}
+    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+        <span class="text-muted">Pas d'image</span>
+    </div>
+    {% endif %}
+    
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <h5 class="card-title">{{ ad.title }}</h5>
+            <span class="badge bg-primary">{{ ad.price }} €</span>
+        </div>
+        
+        <p class="card-text text-muted small mb-2">
+            <i class="bi bi-geo-alt"></i> {{ ad.location }}
+            <span class="ms-2"><i class="bi bi-grid"></i> {{ ad.category.name }}</span>
+        </p>
+        
+        <p class="card-text">{{ ad.description|truncatechars:100 }}</p>
+        
+        <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                <i class="bi bi-person"></i> {{ ad.author.username }}
+            </small>
+            <small class="text-muted">
+                <i class="bi bi-clock"></i> {{ ad.created_at|timesince }}
+            </small>
+        </div>
+    </div>
+    
+    <div class="card-footer bg-transparent">
+        <a href="{% url 'ads:ad_detail' ad.pk %}" class="btn btn-sm btn-outline-primary w-100">
+            Voir détails
+        </a>
+        
+        {% if user.is_authenticated and user == ad.author %}
+        <div class="d-flex mt-2">
+            <a href="{% url 'ads:update_ad' ad.pk %}" class="btn btn-sm btn-outline-secondary flex-grow-1 me-1">
+                <i class="bi bi-pencil"></i>
+            </a>
+            <a href="{% url 'ads:delete_ad' ad.pk %}" class="btn btn-sm btn-outline-danger flex-grow-1">
+                <i class="bi bi-trash"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>

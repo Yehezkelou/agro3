@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ ad.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            {% if ad.images.all %}
+                <div id="adCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for image in ad.images.all %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ ad.title }}">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if ad.images.all|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#adCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#adCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h1 class="card-title">{{ ad.title }}</h1>
+                    {% if ad.is_featured %}
+                        <span class="badge bg-warning text-dark">⭐ En vedette</span>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Catégorie:</strong> {{ ad.category.name }}</p>
+                        <p><strong>Localisation:</strong> {{ ad.location }}</p>
+                        <p><strong>Publié le:</strong> {{ ad.created_at|date:"d/m/Y à H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if ad.price %}
+                            <p><strong>Prix:</strong> <span class="text-primary fw-bold">{{ ad.price }} €</span></p>
+                        {% endif %}
+                        <p><strong>Vues:</strong> {{ ad.views_count }}</p>
+                        <p><strong>Auteur:</strong> {{ ad.author.get_full_name|default:ad.author.username }}</p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h3>Description</h3>
+                    <p>{{ ad.description|linebreaks }}</p>
+                </div>
+                
+                <!-- Actions -->
+                <div class="d-flex gap-2 mb-4">
+                    {% if user.is_authenticated and user != ad.author %}
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal">
+                            Contacter l'annonceur
+                        </button>
+                    {% endif %}
+                    
+                    {% if user == ad.author or user.is_staff %}
+                        <a href="{% url 'ads:update_ad' ad.pk %}" class="btn btn-warning">Modifier</a>
+                        <a href="{% url 'ads:delete_ad' ad.pk %}" class="btn btn-danger">Supprimer</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ratings -->
+        {% if ratings %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Évaluations ({{ ratings_count }})</h3>
+                    {% if average_rating %}
+                        <p class="mb-0">Note moyenne: {{ average_rating|floatformat:1 }}/5</p>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% for rating in ratings %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ rating.user.get_full_name|default:rating.user.username }}</strong>
+                                <div>
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= rating.rating %}⭐{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if rating.comment %}
+                                <p class="mt-2">{{ rating.comment }}</p>
+                            {% endif %}
+                            <small class="text-muted">{{ rating.created_at|date:"d/m/Y à H:i" }}</small>
+                            {% if user == rating.user or user.is_staff %}
+                                <a href="{% url 'ads:delete_rating' rating.pk %}" class="btn btn-sm btn-outline-danger ms-2">Supprimer</a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Formulaire de rating -->
+        {% if rating_form %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Évaluer cette annonce</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'ads:add_rating' ad.pk %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">{{ rating_form.rating.label }}</label>
+                            {{ rating_form.rating }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ rating_form.comment.id_for_label }}" class="form-label">{{ rating_form.comment.label }}</label>
+                            {{ rating_form.comment }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Publier l'évaluation</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Annonces similaires -->
+        {% if similar_ads %}
+            <div class="card">
+                <div class="card-header">
+                    <h3>Annonces similaires</h3>
+                </div>
+                <div class="card-body">
+                    {% for similar_ad in similar_ads %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <h5><a href="{% url 'ads:ad_detail' similar_ad.pk %}">{{ similar_ad.title }}</a></h5>
+                            <p class="text-muted small">{{ similar_ad.location }} - {{ similar_ad.created_at|date:"d/m/Y" }}</p>
+                            {% if similar_ad.price %}
+                                <p class="fw-bold text-primary">{{ similar_ad.price }} €</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal de contact -->
+{% if contact_form %}
+    <div class="modal fade" id="contactModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="{% url 'ads:contact_advertiser' ad.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title">Contacter l'annonceur</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="{{ contact_form.subject.id_for_label }}" class="form-label">{{ contact_form.subject.label }}</label>
+                            {{ contact_form.subject }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ contact_form.message.id_for_label }}" class="form-label">{{ contact_form.message.label }}</label>
+                            {{ contact_form.message }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ contact_form.phone.id_for_label }}" class="form-label">{{ contact_form.phone.label }}</label>
+                            {{ contact_form.phone }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,657 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ ad.title }} - AgroSmart{% endblock %}
+{% load widget_tweaks %}
+{% block content %}
+<style>
+    .detail-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    .main-content {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .premium-badge {
+        position: absolute;
+        top: 2rem;
+        right: 2rem;
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+    }
+
+    .ad-title {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        line-height: 1.2;
+        padding-right: 120px;
+    }
+
+    /* Images Gallery */
+    .images-gallery {
+        margin-bottom: 2rem;
+    }
+
+    .main-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 15px;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-main-image {
+        width: 100%;
+        height: 400px;
+        background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7f8c8d;
+        font-size: 1.5rem;
+        font-style: italic;
+        margin-bottom: 1rem;
+    }
+
+    .thumbnail-gallery {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid transparent;
+    }
+
+    .thumbnail:hover,
+    .thumbnail.active {
+        border-color: #2ecc71;
+        transform: scale(1.05);
+    }
+
+    .image-caption {
+        font-style: italic;
+        color: #7f8c8d;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+
+    .main-badge {
+        background: #2ecc71;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    /* Description */
+    .ad-description {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #2ecc71;
+    }
+
+    .ad-description h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .ad-description p {
+        line-height: 1.8;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    /* Price Card */
+    .price-card {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(231, 76, 60, 0.3);
+    }
+
+    .price-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .price-negotiable {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    /* Info Card */
+    .info-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-card h3 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid #ecf0f1;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #7f8c8d;
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .category-tag {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-sold {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Contact Card */
+    .contact-card {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(46, 204, 113, 0.3);
+    }
+
+    .contact-card h3 {
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .seller-info {
+        margin-bottom: 1.5rem;
+    }
+
+    .seller-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .seller-since {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .contact-btn {
+        background: white;
+        color: #2ecc71;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .contact-btn:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Actions */
+    .actions-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .actions-card h3 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+
+    .action-btn {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-favorite {
+        background: linear-gradient(135deg, #e91e63, #c2185b);
+        color: white;
+    }
+
+    .btn-favorite:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ff9800, #f57c00);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+    }
+
+    .btn-images {
+        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        color: white;
+    }
+
+    .btn-images:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(156, 39, 176, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+    }
+
+    /* Back button */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #2ecc71;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        color: #27ae60;
+        transform: translateX(-5px);
+    }
+
+    /* Share */
+    .share-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .share-section h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .share-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .share-btn {
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .share-facebook {
+        background: #3b5998;
+    }
+
+    .share-twitter {
+        background: #1da1f2;
+    }
+
+    .share-whatsapp {
+        background: #25d366;
+    }
+
+    .share-btn:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .detail-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .ad-title {
+            font-size: 2rem;
+            padding-right: 0;
+        }
+
+        .premium-badge {
+            position: static;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .main-image {
+            height: 300px;
+        }
+
+        .thumbnail {
+            width: 60px;
+            height: 60px;
+        }
+    }
+</style>
+
+<script>
+function changeMainImage(src, caption) {
+    const mainImg = document.getElementById('mainImage');
+    const captionEl = document.getElementById('imageCaption');
+    
+    mainImg.src = src;
+    if (captionEl && caption) {
+        captionEl.textContent = caption;
+    }
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+function toggleFavorite() {
+    const form = document.getElementById('favoriteForm');
+    const btn = document.getElementById('favoriteBtn');
+    
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.is_favorite) {
+            btn.textContent = '💔 Retirer des favoris';
+            btn.style.background = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
+        } else {
+            btn.textContent = '❤️ Ajouter aux favoris';
+            btn.style.background = 'linear-gradient(135deg, #e91e63, #c2185b)';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function shareOnFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank', 'width=600,height=400');
+}
+
+function shareOnTwitter() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank', 'width=600,height=400');
+}
+
+function shareOnWhatsApp() {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    window.open(`https://wa.me/?text=${title}%20${url}`, '_blank');
+}
+</script>
+
+<a href="{% url 'publicites:list' %}" class="back-btn">
+    ← Retour à la liste
+</a>
+<div class="detail-container">
+    <!-- Contenu principal -->
+    <div class="main-content">
+        {% if ad.is_premium %}
+            <span class="premium-badge">⭐ PREMIUM</span>
+        {% endif %}
+        
+        <h1 class="ad-title">{{ ad.title }}</h1>
+        
+        <!-- Galerie d'images -->
+        <div class="images-gallery">
+            {% if ad.images.all %}
+                {% with main_image=ad.images.all|first %}
+                    <img id="mainImage" src="{{ main_image.image.url }}" alt="{{ main_image.caption|default:ad.title }}" class="main-image">
+                    {% if main_image.caption %}
+                        <p id="imageCaption" class="image-caption">
+                            {{ main_image.caption }}
+                            {% if main_image.is_main %}
+                                <span class="main-badge">Image principale</span>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                {% endwith %}
+               {% load widget_tweaks %} 
+                {% if ad.images.all|length > 1 %}
+                    <div class="thumbnail-gallery">
+                        {% for image in ad.images.all %}
+                            <img src="{{ image.image.url }}"  alt="{{ image.caption|default:ad.title }}"  class="thumbnail {% if forloop.first %}active{% endif %}" onclick="changeMainImage('{{ image.image.url }}', '{{ image.caption|default:ad.title }}')">
+                            {% if image.caption %}
+                                <p class="image-caption">{{ image.caption }}</p>
+                            {% endif %}
+                        {% empty %}
+                            <p>Aucune image disponible</p>
+
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="no-main-image">
+                    📷 Aucune image disponible
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Description -->
+        <div class="ad-description">
+            <h3>📝 Description</h3>
+            <p>{{ ad.description|linebreaks }}</p>
+        </div>
+        
+        <!-- Section de partage -->
+        <div class="share-section">
+            <h4>Partager cette annonce</h4>
+            <div class="share-buttons">
+                <button class="share-btn share-facebook" onclick="shareOnFacebook()">
+                    Facebook
+                </button>
+                <button class="share-btn share-twitter" onclick="shareOnTwitter()">
+                    Twitter
+                </button>
+                <button class="share-btn share-whatsapp" onclick="shareOnWhatsApp()">
+                    WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Prix -->
+        <div class="price-card">
+            <div class="price-label">Prix</div>
+            <div class="price-value">{{ ad.price }} €</div>
+            <div class="price-negotiable">Prix négociable</div>
+        </div>
+        
+        <!-- Informations -->
+        <div class="info-card">
+            <h3>ℹ️ Informations</h3>
+            
+            <div class="info-item">
+                <span class="info-label">Catégorie</span>
+                <span class="info-value">
+                    <span class="category-tag">{{ ad.category.name }}</span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Statut</span>
+                <span class="info-value">
+                    <span class="status-badge {% if ad.status == 'active' %}status-active{% else %}status-sold{% endif %}">
+                        {{ ad.get_status_display }}
+                    </span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Publié le</span>
+                <span class="info-value">{{ ad.created_at|date:"d/m/Y à H:i" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Vues</span>
+                <span class="info-value">{{ ad.views|default:0 }}</span>
+            </div>
+        </div>
+        
+        <!-- Contact vendeur -->
+        {% if user != ad.author %}
+            <div class="contact-card">
+                <h3>💬 Contacter le vendeur</h3>
+                <div class="seller-info">
+                    <div class="seller-name">{{ ad.author.username }}</div>
+                    <div class="seller-since">Membre depuis {{ ad.author.date_joined|date:"M Y" }}</div>
+                </div>
+                <button class="contact-btn" onclick="alert('Fonctionnalité de contact à implémenter')">
+                    Envoyer un message
+                </button>
+            </div>
+        {% endif %}
+        
+        <!-- Actions -->
+        <div class="actions-card">
+            <h3>⚡ Actions</h3>
+            
+            {% if user.is_authenticated %}
+                <form id="favoriteForm" method="post" action="{% url 'publicites:toggle_favorite' ad.pk %}" style="display: none;">
+                    {% csrf_token %}
+                </form>
+                <button id="favoriteBtn" class="action-btn btn-favorite" onclick="toggleFavorite()">
+                    {% if is_favorite %}💔 Retirer des favoris{% else %}❤️ Ajouter aux favoris{% endif %}
+                </button>
+            {% endif %}
+            
+            {% if user == ad.author %}
+                <a href="{% url 'publicites:edit' ad.pk %}" class="action-btn btn-edit">
+                    ✏️ Modifier l'annonce
+                </a>
+                <a href="{% url 'publicites:images' ad.pk %}" class="action-btn btn-images">
+                    🖼️ Gérer les images
+                </a>
+                <a href="{% url 'publicites:delete' ad.pk %}" class="action-btn btn-delete">
+                    🗑️ Supprimer l'annonce
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Annonce Rejetée</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f44336; color: white; padding: 10px; text-align: center; }
+        .content { padding: 20px; border: 1px solid #ddd; }
+        .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #777; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #f44336; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Annonce Rejetée</h1>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour {{ ad.author.username }},</p>
+            
+            <p>Nous regrettons de vous informer que votre annonce <strong>"{{ ad.title }}"</strong> n'a pas été approuvée.</p>
+            
+            <p><strong>Raison possible :</strong></p>
+            <ul>
+                <li>Contenu inapproprié</li>
+                <li>Violation des conditions d'utilisation</li>
+                <li>Informations manquantes ou incorrectes</li>
+            </ul>
+            
+            <p>Vous pouvez modifier votre annonce et la soumettre à nouveau pour révision.</p>
+            
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="{{ site_url }}{% url 'ads:update_ad' ad.pk %}" class="btn">
+                    Modifier mon annonce
+                </a>
+            </div>
+            
+            <p>Pour toute question, veuillez contacter notre support.</p>
+        </div>
+        
+        <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+            <p>&copy; {% now "Y" %} {{ site_name }}. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

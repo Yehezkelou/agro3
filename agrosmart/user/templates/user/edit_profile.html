@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroSmart - Modifier le profil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% load widget_tweaks %}
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Dark mode detection and handling
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <svg class="h-10 w-10 text-primary-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3C17.5228 3 22 7.47715 22 13C22 18.5228 17.5228 23 12 23C6.47715 23 2 18.5228 2 13C2 7.47715 6.47715 3 12 3Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V13L15 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 4C7 2.89543 7.89543 2 9 2H15C16.1046 2 17 2.89543 17 4V5H7V4Z" fill="currentColor"/>
+                </svg>
+                <h1 class="ml-2 text-2xl font-bold text-primary-600 dark:text-primary-400">AgroSmart</h1>
+            </div>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Accueil</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">À propos</a></li>
+                    <li><a href="#" class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 md:p-8">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Modifier le profil</h1>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Mettez à jour vos informations personnelles et professionnelles
+                </p>
+            </div>
+            
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200{% else %}bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="post" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- User Information Section -->
+                <div>
+                    <div class="mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Informations utilisateur
+                        </h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ user_form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ user_form.username.label }}
+                            </label>
+                            <div class="mt-1 relative">
+                                {{ user_form.username|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                                <div id="username_feedback" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                            {% if user_form.username.errors %}
+                                <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in user_form.username.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div id="username_error" class="mt-1 text-red-600 dark:text-red-400 text-sm hidden"></div>
+                        </div>
+                        
+                        <div>
+                            <label for="{{ user_form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ user_form.email.label }}
+                            </label>
+                            <div class="mt-1 relative">
+                                {{ user_form.email|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                                <div id="email_feedback" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                            {% if user_form.email.errors %}
+                                <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in user_form.email.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div id="email_error" class="mt-1 text-red-600 dark:text-red-400 text-sm hidden"></div>
+                        </div>
+                        
+                        <div>
+                            <label for="{{ user_form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ user_form.first_name.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ user_form.first_name|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                            </div>
+                            {% if user_form.first_name.errors %}
+                                <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in user_form.first_name.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <label for="{{ user_form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ user_form.last_name.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ user_form.last_name|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                            </div>
+                            {% if user_form.last_name.errors %}
+                                <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in user_form.last_name.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Information Section -->
+                <div>
+                    <div class="mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            Informations de profil
+                        </h2>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="{{ profile_form.bio.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ profile_form.bio.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ profile_form.bio|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                            </div>
+                            {% if profile_form.bio.errors %}
+                                <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                    {% for error in profile_form.bio.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Partagez quelques informations sur vous, vos activités ou votre expertise agricole.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ profile_form.website.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {{ profile_form.website.label }}
+                                </label>
+                                <div class="mt-1">
+                                    {{ profile_form.website|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                                </div>
+                                {% if profile_form.website.errors %}
+                                    <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                        {% for error in profile_form.website.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Format: https://www.exemple.com</p>
+                            </div>
+                            
+                            <div>
+                                <label for="{{ profile_form.location.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {{ profile_form.location.label }}
+                                </label>
+                                <div class="mt-1">
+                                    {{ profile_form.location|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-base py-2 px-3 dark:bg-gray-700 dark:border-gray-600 dark:text-white" }}
+                                </div>
+                                {% if profile_form.location.errors %}
+                                    <div class="mt-1 text-red-600 dark:text-red-400 text-sm">
+                                        {% for error in profile_form.location.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between gap-4 pt-6">
+                    <a href="{% url 'users:profile' %}" class="w-1/3 py-2 px-4 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 text-center">
+                        Annuler
+                    </a>
+                    <button type="submit" class="w-2/3 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        Mettre à jour le profil
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="bg-white dark:bg-gray-800 mt-8 pt-8 pb-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-wrap justify-between">
+                <div class="w-full md:w-1/4 mb-6 md:mb-0">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">AgroSmart</h3>
+                    <p class="text-gray-600 dark:text-gray-400">Transformons l'agriculture ensemble pour un avenir meilleur et plus durable.</p>
+                </div>
+                <div class="w-full md:w-1/4 mb-6 md:mb-0">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Liens Rapides</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Accueil</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">À propos</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Services</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/4 mb-6 md:mb-0">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Légal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Conditions d'utilisation</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Politique de confidentialité</a></li>
+                        <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">Cookies</a></li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/4">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Nous Suivre</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                            <span class="sr-only">Facebook</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                            <span class="sr-only">Instagram</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-6 text-center">
+                <p class="text-sm text-gray-500 dark:text-gray-400">© 2023 AgroSmart. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Django will likely need a filter for add_class, here's a script to handle that if it's not available
+        document.addEventListener('DOMContentLoaded', function() {
+            const formControls = document.querySelectorAll('form input:not([type="file"]), form select, form textarea');
+            formControls.forEach(element => {
+                element.classList.add('block', 'w-full', 'rounded-md', 'border-gray-300', 'shadow-sm', 'focus:border-primary-500', 'focus:ring-primary-500', 'text-base', 'py-2', 'px-3', 'dark:bg-gray-700', 'dark:border-gray-600', 'dark:text-white');
+            });
+            
+            // Improved AJAX validation for username and email
+            const usernameInput = document.getElementById('id_username');
+            const emailInput = document.getElementById('id_email');
+            const usernameFeedback = document.getElementById('username_feedback');
+            const emailFeedback = document.getElementById('email_feedback');
+            const usernameError = document.getElementById('username_error');
+            const emailError = document.getElementById('email_error');
+            
+            // Username validation
+            if (usernameInput) {
+                usernameInput.addEventListener('blur', function() {
+                    const username = this.value;
+                    if (username) {
+                        // Reset visual feedback
+                        usernameFeedback.classList.add('hidden');
+                        usernameError.classList.add('hidden');
+                        
+                        // Check if username is available
+                        fetch(`{% url 'users:ajax_check_username' %}?username=${encodeURIComponent(username)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.available) {
+                                    // Show error icon
+                                    usernameFeedback.classList.remove('hidden');
+                                    
+                                    // Show error message
+                                    usernameError.textContent = 'Ce nom d\'utilisateur est déjà pris.';
+                                    usernameError.classList.remove('hidden');
+                                    
+                                    // Add error styling to input
+                                    usernameInput.classList.add('border-red-500', 'dark:border-red-500');
+                                } else {
+                                    // Remove error styling
+                                    usernameInput.classList.remove('border-red-500', 'dark:border-red-500');
+                                }
+                            });
+                    }
+                });
+            }
+            
+            // Email validation
+            if (emailInput) {
+                emailInput.addEventListener('blur', function() {
+                    const email = this.value;
+                    if (email) {
+                        // Reset visual feedback
+                        emailFeedback.classList.add('hidden');
+                        emailError.classList.add('hidden');
+                        
+                        // Check if email is available
+                        fetch(`{% url 'users:ajax_check_email' %}?email=${encodeURIComponent(email)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.available) {
+                                    // Show error icon
+                                    emailFeedback.classList.remove('hidden');
+                                    
+                                    // Show error message
+                                    emailError.textContent = 'Cet email est déjà utilisé.';
+                                    emailError.classList.remove('hidden');
+                                    
+                                    // Add error styling to input
+                                    emailInput.classList.add('border-red-500', 'dark:border-red-500');
+                                } else {
+                                    // Remove error styling
+                                    emailInput.classList.remove('border-red-500', 'dark:border-red-500');
+                                }
+                            });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

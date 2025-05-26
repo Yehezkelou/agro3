@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - AgroSmart</title>
+    <style>
+    /* Page de Connexion AgriConnect - Thème Vert */
+
+/* Variables CSS pour la palette de couleurs vertes */
+:root {
+    --primary-green: #2E7D32;
+    --light-green: #4CAF50;
+    --dark-green: #1B5E20;
+    --accent-green: #66BB6A;
+    --soft-green: #A5D6A7;
+    --pale-green: #E8F5E8;
+    --forest-green: #388E3C;
+    --mint-green: #81C784;
+    
+    --white: #FFFFFF;
+    --light-gray: #F5F5F5;
+    --medium-gray: #E0E0E0;
+    --dark-gray: #424242;
+    --text-dark: #212121;
+    --text-light: #757575;
+    
+    --shadow-light: 0 2px 10px rgba(46, 125, 50, 0.1);
+    --shadow-medium: 0 4px 20px rgba(46, 125, 50, 0.15);
+    --shadow-heavy: 0 8px 30px rgba(46, 125, 50, 0.2);
+    
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset et base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--forest-green) 50%, var(--dark-green) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animation du fond */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M40 40c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm20-20c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    animation: backgroundMove 60s linear infinite;
+}
+
+@keyframes backgroundMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-80px, -80px); }
+}
+
+/* Formes flottantes animées */
+body::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(45deg, var(--soft-green), var(--mint-green));
+    border-radius: 50%;
+    opacity: 0.1;
+    top: 10%;
+    right: 15%;
+    animation: float 15s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-30px) rotate(90deg);
+    }
+    50% {
+        transform: translateY(-15px) rotate(180deg);
+    }
+    75% {
+        transform: translateY(-45px) rotate(270deg);
+    }
+}
+
+/* Container principal de connexion */
+.auth-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-heavy);
+    padding: 3rem;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* En-tête d'authentification */
+.auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.auth-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.auth-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--light-green), var(--accent-green));
+    border-radius: 2px;
+}
+
+.auth-header p {
+    color: var(--text-light);
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+/* Messages d'alerte */
+.messages {
+    margin-bottom: 1.5rem;
+}
+
+.alert {
+    padding: 1rem 1.2rem;
+    border-radius: var(--border-radius-small);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    border-left: 4px solid;
+    animation: slideInLeft 0.4s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-success {
+    background: var(--pale-green);
+    color: var(--dark-green);
+    border-left-color: var(--light-green);
+}
+
+.alert-error {
+    background: #ffebee;
+    color: #c62828;
+    border-left-color: #e53935;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-left-color: #1976d2;
+}
+
+.alert-warning {
+    background: #fff3e0;
+    color: #e65100;
+    border-left-color: #ff9800;
+}
+
+/* Formulaire */
+.auth-form {
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--medium-gray);
+    border-radius: var(--border-radius-small);
+    font-size: 1rem;
+    background: var(--white);
+    transition: var(--transition);
+    outline: none;
+    font-family: inherit;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-group input:focus + label {
+    color: var(--primary-green);
+}
+
+/* Effet de ligne animée sous les inputs */
+.form-group::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--light-green), var(--accent-green));
+    transition: var(--transition);
+    transform: translateX(-50%);
+}
+
+.form-group input:focus ~ ::after {
+    width: 100%;
+}
+
+/* Listes d'erreurs */
+.errorlist {
+    list-style: none;
+    margin-top: 0.5rem;
+    padding: 0;
+}
+
+.errorlist li {
+    color: #c62828;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+    position: relative;
+    padding-left: 1.2rem;
+}
+
+.errorlist li::before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+    color: #e53935;
+}
+
+/* Checkbox "Se souvenir de moi" */
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 0.5rem;
+}
+
+.form-check input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    position: relative;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--medium-gray);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.form-check input[type="checkbox"]:checked {
+    background: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+.form-check input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Bouton de connexion */
+.btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--forest-green) 100%);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+    background: linear-gradient(135deg, var(--forest-green) 0%, var(--dark-green) 100%);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Effet de brillance sur le bouton */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+/* Lien mot de passe oublié */
+.forgot-password {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.forgot-password a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-small);
+}
+
+.forgot-password a:hover {
+    color: var(--forest-green);
+    background: var(--pale-green);
+    text-decoration: underline;
+}
+
+/* Liens d'authentification */
+.auth-links {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--medium-gray);
+}
+
+.auth-links p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.auth-links a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius-small);
+}
+
+.auth-links a:hover {
+    color: var(--forest-green);
+    background: var(--pale-green);
+    text-decoration: underline;
+}
+
+/* Animation des éléments du formulaire */
+.form-group {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-check { animation: fadeInUp 0.5s ease-out 0.3s both; }
+.btn { animation: fadeInUp 0.5s ease-out 0.4s both; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    body {
+        padding: 1rem;
+    }
+    
+    .auth-container {
+        padding: 2rem 1.5rem;
+    }
+    
+    .auth-header h2 {
+        font-size: 1.7rem;
+    }
+    
+    .form-group input {
+        padding: 0.75rem;
+        font-size: 16px; /* Évite le zoom sur iOS */
+    }
+}
+
+/* Amélioration pour les écrans très petits */
+@media (max-width: 320px) {
+    .auth-container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .auth-header h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Styles pour mode sombre (optionnel) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --white: #1a1a1a;
+        --light-gray: #2d2d2d;
+        --medium-gray: #404040;
+        --text-dark: #ffffff;
+        --text-light: #b0b0b0;
+    }
+    
+    .auth-container {
+        background: rgba(26, 26, 26, 0.95);
+        border: 1px solid var(--medium-gray);
+    }
+    
+    .form-group input {
+        background: var(--light-gray);
+        color: var(--text-dark);
+        border-color: var(--medium-gray);
+    }
+}
+
+/* États de focus améliorés pour l'accessibilité */
+.btn:focus,
+.form-group input:focus,
+.form-check input:focus {
+    outline: 2px solid var(--accent-green);
+    outline-offset: 2px;
+}
+
+/* Animation au chargement de la page */
+body {
+    animation: pageLoad 0.8s ease-out;
+}
+
+@keyframes pageLoad {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>Connexion</h2>
+            <p>Accédez à votre compte</p>
+        </div>
+        
+        <form class="auth-form" method="post">
+            {% csrf_token %}
+            
+            <!-- Messages -->
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <!-- Erreurs globales du formulaire -->
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Nom d'utilisateur ou Email</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.password.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            
+            <div class="form-check">
+                {{ form.remember_me }}
+                <label for="{{ form.remember_me.id_for_label }}" class="form-check-label">
+                    Se souvenir de moi
+                </label>
+            </div>
+            
+            <button type="submit" class="btn">Se connecter</button>
+            
+            <div class="forgot-password">
+                <a href="#">Mot de passe oublié ?</a>
+            </div>
+        </form>
+        
+        <div class="auth-links">
+            <p>Vous n'avez pas de compte ? <a href="{% url 'accounts:register' %}">Créer un compte</a></p>
+        </div>
+    </div>
+</body>
+</html>

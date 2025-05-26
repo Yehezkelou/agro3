@@ -1,0 +1,981 @@
+{% extends 'base.html' %}
+
+{% block title %}Créer une annonce - AgroSmart{% endblock %}
+{% load widget_tweaks %}
+{% block content %}
+<style>
+    :root {
+        --primary-color: #2ecc71;
+        --primary-dark: #27ae60;
+        --primary-light: #e8f7f0;
+        --secondary-color: #e74c3c;
+        --secondary-dark: #c0392b;
+        --accent-color: #3498db;
+        --accent-dark: #2980b9;
+        --premium-color: #f39c12;
+        --premium-dark: #e67e22;
+        --premium-gradient: linear-gradient(135deg, #f39c12, #e67e22);
+        
+        --bg-light: #ffffff;
+        --bg-light-alt: #f8f9fa;
+        --text-light: #2c3e50;
+        --text-muted-light: #7f8c8d;
+        --surface-light: #ffffff;
+        --input-border-light: #ecf0f1;
+        --input-bg-light: #ffffff;
+        --card-shadow-light: 0 10px 40px rgba(0, 0, 0, 0.1);
+        --hover-shadow-light: 0 15px 40px rgba(46, 204, 113, 0.2);
+        --error-bg-light: #f8d7da;
+        --error-text-light: #721c24;
+        --error-border-light: #dc3545;
+        
+        --bg-dark: #121212;
+        --bg-dark-alt: #1e1e1e;
+        --text-dark: #ecf0f1;
+        --text-muted-dark: #bdc3c7;
+        --surface-dark: #1e1e1e;
+        --input-border-dark: #2c3e50;
+        --input-bg-dark: #2c3e50;
+        --card-shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.3);
+        --hover-shadow-dark: 0 15px 40px rgba(46, 204, 113, 0.15);
+        --error-bg-dark: #321c1e;
+        --error-text-dark: #f8d7da;
+        --error-border-dark: #dc3545;
+        
+        --border-radius-sm: 8px;
+        --border-radius-md: 10px;
+        --border-radius-lg: 15px;
+        --border-radius-xl: 20px;
+        --border-radius-circle: 50%;
+        
+        --transition-fast: 0.2s ease;
+        --transition-normal: 0.3s ease;
+        --transition-slow: 0.5s ease;
+    }
+    
+    /* Dark mode variables */
+    .dark {
+        --bg-primary: var(--bg-dark);
+        --bg-alt: var(--bg-dark-alt);
+        --text-primary: var(--text-dark);
+        --text-muted: var(--text-muted-dark);
+        --surface: var(--surface-dark);
+        --input-border: var(--input-border-dark);
+        --input-bg: var(--input-bg-dark);
+        --card-shadow: var(--card-shadow-dark);
+        --hover-shadow: var(--hover-shadow-dark);
+        --error-bg: var(--error-bg-dark);
+        --error-text: var(--error-text-dark);
+        --error-border: var(--error-border-dark);
+    }
+    
+    /* Light mode variables (default) */
+    :root {
+        --bg-primary: var(--bg-light);
+        --bg-alt: var(--bg-light-alt);
+        --text-primary: var(--text-light);
+        --text-muted: var(--text-muted-light);
+        --surface: var(--surface-light);
+        --input-border: var(--input-border-light);
+        --input-bg: var(--input-bg-light);
+        --card-shadow: var(--card-shadow-light);
+        --hover-shadow: var(--hover-shadow-light);
+        --error-bg: var(--error-bg-light);
+        --error-text: var(--error-text-light);
+        --error-border: var(--error-border-light);
+    }
+    
+    /* Theme Toggle */
+    .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--surface);
+        color: var(--text-primary);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-normal);
+    }
+    
+    .theme-toggle:hover {
+        transform: scale(1.1);
+    }
+    
+    /* Create Container */
+    .create-container {
+        max-width: 800px;
+        margin: 2rem auto 4rem;
+        background: var(--surface);
+        border-radius: var(--border-radius-xl);
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .create-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .page-title {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        color: var(--text-primary);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 0.5rem;
+        transition: color var(--transition-normal);
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 2px;
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto;
+        transition: color var(--transition-normal);
+    }
+
+    /* Progress Indicator */
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 3rem;
+        position: relative;
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    .progress-line {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 2px;
+        background: var(--input-border);
+        width: 50%;
+        z-index: 0;
+        transition: background-color var(--transition-normal);
+    }
+    
+    .progress-line-active {
+        position: absolute;
+        top: 50%;
+        left: 25%;
+        transform: translateY(-50%);
+        height: 2px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        width: 0%;
+        z-index: 1;
+        transition: width 0.5s ease-out;
+    }
+
+    .progress-step {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--border-radius-circle);
+        background: var(--bg-alt);
+        border: 2px solid var(--input-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin: 0 2rem;
+        position: relative;
+        z-index: 2;
+        transition: all var(--transition-normal);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-step.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        border-color: var(--primary-color);
+        transform: scale(1.1);
+    }
+    
+    .progress-step.completed {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .progress-step-label {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        white-space: nowrap;
+        color: var(--text-muted);
+        transition: color var(--transition-normal);
+    }
+    
+    .progress-step.active .progress-step-label {
+        color: var(--primary-color);
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2rem;
+        padding: 2rem;
+        background: var(--bg-alt);
+        border-radius: var(--border-radius-lg);
+        border-left: 4px solid var(--primary-color);
+        transition: all var(--transition-normal), transform 0.4s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-section:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+    
+    .form-section::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 30%;
+        height: 30%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0 100 L100 100 L100 0 Z" fill="%232ecc71" opacity="0.03"/></svg>');
+        background-size: 100% 100%;
+        pointer-events: none;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+        transition: color var(--transition-normal);
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 2px;
+        background: var(--primary-color);
+        transition: width var(--transition-normal);
+    }
+    
+    .form-section:hover .section-title::after {
+        width: 80px;
+    }
+    
+    .section-title i {
+        color: var(--primary-color);
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        transition: color var(--transition-fast);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-label i {
+        color: var(--primary-color);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--input-border);
+        border-radius: var(--border-radius-md);
+        font-size: 1rem;
+        transition: all var(--transition-normal);
+        background: var(--input-bg);
+        color: var(--text-primary);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .form-control:hover:not(:focus) {
+        border-color: var(--primary-color);
+    }
+
+    .form-control.textarea {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .form-select {
+        appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%232c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 3rem;
+    }
+    
+    .dark .form-select {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23ecf0f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+    }
+
+    /* Checkbox */
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--surface);
+        border-radius: var(--border-radius-md);
+        border: 2px solid var(--input-border);
+        transition: all var(--transition-normal);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .checkbox-container:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-light);
+        transform: translateY(-2px);
+    }
+    
+    .dark .checkbox-container:hover {
+        background: rgba(46, 204, 113, 0.1);
+    }
+    
+    .checkbox-container input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+
+    .checkbox-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .premium-info {
+        background: var(--premium-gradient);
+        color: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius-md);
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        box-shadow: 0 5px 15px rgba(243, 156, 18, 0.2);
+        position: relative;
+        transition: all var(--transition-normal);
+    }
+    
+    .premium-info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><path d="M40 20L44.5 29.5L55 31L47.5 38.3L49 49L40 44L31 49L32.5 38.3L25 31L35.5 29.5Z" fill="%23ffffff" opacity="0.1"/></svg>');
+        background-size: 100px 100px;
+        pointer-events: none;
+    }
+    
+    .premium-info strong {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    /* Form Validation */
+    .error-list {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    .error-list li {
+        background: var(--error-bg);
+        color: var(--error-text);
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        margin-bottom: 0.5rem;
+        border-left: 3px solid var(--error-border);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all var(--transition-normal);
+    }
+    
+    .error-list li::before {
+        content: '\f06a';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--error-border);
+    }
+
+    .help-text {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        transition: color var(--transition-normal);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .help-text::before {
+        content: '\f05a';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--primary-color);
+        font-size: 0.8rem;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--input-border);
+        transition: border-color var(--transition-normal);
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: var(--border-radius-xl);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all var(--transition-normal);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+        transform: translateY(100%);
+        transition: transform 0.6s ease;
+        z-index: -1;
+    }
+    
+    .btn:hover::after {
+        transform: translateY(-100%);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        box-shadow: 0 8px 30px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--bg-alt);
+        color: var(--text-primary);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        border: 2px solid var(--input-border);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-color);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.3);
+        }
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .create-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+        
+        .progress-step {
+            width: 40px;
+            height: 40px;
+            margin: 0 1rem;
+        }
+        
+        .progress-step-label {
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+    }
+    
+    /* Prefers reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+</style>
+
+<!-- Dark Mode Toggle -->
+<button class="theme-toggle" aria-label="Changer de thème">
+    <i class="fa-solid fa-sun"></i>
+</button>
+
+<div class="create-container">
+    <div class="page-header">
+        <h1 class="page-title">🚀 Créer une nouvelle annonce</h1>
+        <p class="page-subtitle">
+            Partagez vos produits avec notre communauté et trouvez des acheteurs facilement
+        </p>
+    </div>
+
+    <div class="progress-indicator">
+        <div class="progress-line"></div>
+        <div class="progress-line-active" id="progress-line"></div>
+        
+        <div class="progress-step active" data-step="1">
+            1
+            <span class="progress-step-label">Informations</span>
+        </div>
+        <div class="progress-step" data-step="2">
+            2
+            <span class="progress-step-label">Photos</span>
+        </div>
+        <div class="progress-step" data-step="3">
+            3
+            <span class="progress-step-label">Finalisation</span>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3 class="section-title"><i class="fa-solid fa-file-lines"></i> Informations de base</h3>
+            
+            <div class="form-group">
+                {{ form.title.label_tag }}
+                {{ form.title|add_class:"form-control" }}
+                {% if form.title.errors %}
+                    <ul class="error-list">
+                        {% for error in form.title.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="help-text">Choisissez un titre accrocheur et descriptif</div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.description.label_tag }}
+                {{ form.description|add_class:"form-control textarea" }}
+                {% if form.description.errors %}
+                    <ul class="error-list">
+                        {% for error in form.description.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="help-text">Décrivez votre produit en détail (état, caractéristiques, etc.)</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title"><i class="fa-solid fa-tag"></i> Prix et catégorie</h3>
+            
+            <div class="form-group">
+                {{ form.price.label_tag }}
+                {{ form.price|add_class:"form-control" }}
+                {% if form.price.errors %}
+                    <ul class="error-list">
+                        {% for error in form.price.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="help-text">Prix en euros (ex: 25.50)</div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.category.label_tag }}
+                {{ form.category|add_class:"form-control form-select" }}
+                {% if form.category.errors %}
+                    <ul class="error-list">
+                        {% for error in form.category.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="help-text">Choisissez la catégorie qui correspond le mieux</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title"><i class="fa-solid fa-gear"></i> Options avancées</h3>
+            
+            <div class="form-group">
+                {{ form.status.label_tag }}
+                {{ form.status|add_class:"form-control form-select" }}
+                {% if form.status.errors %}
+                    <ul class="error-list">
+                        {% for error in form.status.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="help-text">Statut de disponibilité de votre article</div>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-container">
+                    {{ form.is_premium }}
+                    <label class="checkbox-label" for="{{ form.is_premium.id_for_label }}">
+                        ⭐ Rendre cette annonce Premium
+                    </label>
+                </div>
+                {% if form.is_premium.errors %}
+                    <ul class="error-list">
+                        {% for error in form.is_premium.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="premium-info">
+                    <strong>Avantages Premium :</strong>
+                    <br>• Mise en avant dans les résultats de recherche
+                    <br>• Badge "Premium" visible sur votre annonce
+                    <br>• Priorité dans les recommandations
+                    <br>• Statistiques détaillées de consultation
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-bullhorn"></i> Publier l'annonce
+            </button>
+            <a href="{% url 'publicites:list' %}" class="btn btn-secondary">
+                <i class="fa-solid fa-times"></i> Annuler
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Ajout de Font Awesome pour les icônes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Script pour les animations et le dark mode -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du mode sombre
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+            updateThemeToggleIcon();
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateThemeToggleIcon();
+        });
+        
+        const themeToggle = document.querySelector('.theme-toggle');
+        
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            updateThemeToggleIcon();
+            
+            // Effet de ripple lors du clic
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            ripple.style.width = '100%';
+            ripple.style.height = '100%';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.opacity = '0';
+            
+            themeToggle.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+        
+        function updateThemeToggleIcon() {
+            const icon = document.querySelector('.theme-toggle i');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.className = 'fa-solid fa-moon';
+            } else {
+                icon.className = 'fa-solid fa-sun';
+            }
+        }
+        
+        // Animation sur focus des champs de formulaire
+        const formControls = document.querySelectorAll('.form-control');
+        
+        formControls.forEach(input => {
+            const label = input.previousElementSibling;
+            
+            input.addEventListener('focus', () => {
+                if (label && label.classList.contains('form-label')) {
+                    label.style.color = 'var(--primary-color)';
+                }
+            });
+            
+            input.addEventListener('blur', () => {
+                if (label && label.classList.contains('form-label')) {
+                    label.style.color = '';
+                }
+            });
+        });
+        
+        // Animation de l'indicateur de progression
+        const progressLine = document.getElementById('progress-line');
+        setTimeout(() => {
+            progressLine.style.width = '0%';
+        }, 300);
+        
+        // Effet de ripple sur les boutons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!button.classList.contains('btn-secondary')) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                    ripple.style.width = '0';
+                    ripple.style.height = '0';
+                    ripple.style.animation = 'ripple-effect 0.6s linear';
+                    ripple.style.pointerEvents = 'none';
+                    
+                    // Set button position to relative if it's not already
+                    if (getComputedStyle(this).position === 'static') {
+                        this.style.position = 'relative';
+                    }
+                    
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                }
+            });
+        });
+        
+        // Animation ripple-effect
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple-effect {
+                0% {
+                    width: 0;
+                    height: 0;
+                    opacity: 0.5;
+                }
+                100% {
+                    width: 500px;
+                    height: 500px;
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Animation au survol des sections
+        const formSections = document.querySelectorAll('.form-section');
+        formSections.forEach(section => {
+            section.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = 'var(--hover-shadow)';
+            });
+            
+            section.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+                this.style.boxShadow = '';
+            });
+        });
+        
+        // Effet de toggle sur premium info
+        const isPremiumCheckbox = document.querySelector('#{{ form.is_premium.id_for_label }}');
+        const premiumInfo = document.querySelector('.premium-info');
+        
+        if (isPremiumCheckbox && isPremiumCheckbox.checked) {
+            premiumInfo.style.display = 'block';
+        } else {
+            premiumInfo.style.display = 'none';
+        }
+        
+        if (isPremiumCheckbox) {
+            isPremiumCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    premiumInfo.style.display = 'block';
+                    premiumInfo.style.animation = 'fadeInUp 0.3s ease-out';
+                } else {
+                    premiumInfo.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

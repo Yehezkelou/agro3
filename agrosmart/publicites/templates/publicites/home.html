@@ -1,0 +1,617 @@
+{% extends 'base.html' %}
+
+{% block title %}AgroSmart - Plateforme D'annonces agricoles intelligente{% endblock %}
+
+{% block content %}
+<!-- Hero Section avec fond dégradé et motif SVG -->
+<section class="relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-800 text-white rounded-3xl shadow-2xl shadow-green-500/20 dark:shadow-green-800/30 mb-16 transform transition-all duration-500 hover:shadow-green-500/30">
+    <!-- Motif d'arrière-plan décoratif -->
+    <div class="absolute inset-0 opacity-10">
+        <svg class="w-full h-full" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#ffffff" d="M0,300 L1000,300 L1000,200 L800,150 L600,200 L400,100 L200,150 L0,100 Z"></path>
+            <path fill="#ffffff" opacity="0.5" d="M0,250 L1000,290 L1000,180 L800,120 L600,150 L400,80 L200,120 L0,80 Z"></path>
+        </svg>
+    </div>
+    
+    <div class="container mx-auto px-6 py-20 relative z-10">
+        <!-- Contenu Hero -->
+        <div class="text-center mb-8 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight text-shadow-lg transform transition-transform duration-500 hover:scale-105">
+                🌾 Votre partenaire agricole intelligent
+            </h1>
+            <p class="text-xl md:text-2xl opacity-90 font-light mb-8 max-w-3xl mx-auto">
+                La plateforme #1 des Annonces de l'agriculture de demain
+            </p>
+            
+            <!-- Barre de recherche avec animation -->
+            <form method="get" action="{% url 'publicites:list' %}" class="max-w-3xl mx-auto mb-10 transform transition-all duration-500 hover:scale-[1.02] group">
+                <div class="flex flex-col md:flex-row rounded-full overflow-hidden shadow-2xl shadow-black/20 hover:shadow-black/30 transition-shadow duration-300">
+                    <input type="text" name="search" placeholder="Tracteur, moissonneuse, outils..." required 
+                           class="w-full py-5 px-8 text-lg text-gray-800 dark:text-white bg-white dark:bg-gray-800 border-0 focus:outline-none focus:ring-0" />
+                    <button type="submit" 
+                            class="relative overflow-hidden py-5 px-8 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white text-lg font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 group-hover:shadow-lg">
+                        <span class="absolute right-0 -mt-12 -mr-12 h-32 w-8 opacity-10 bg-white transform rotate-12 transition-transform duration-1000 ease-out group-hover:translate-x-10"></span>
+                        🔍 Rechercher
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Boutons CTA -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'users:register' %}" class="group relative py-4 px-6 bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-full text-white font-bold text-lg shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                        <span class="relative z-10">Rejoindre AgroSmart</span>
+                        <span class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'publicites:create' %}" class="group relative py-4 px-6 bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-full text-white font-bold text-lg shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                        <span class="relative z-10">Publier une annonces</span>
+                        <span class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 dark:from-red-700 dark:to-red-800 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
+                    </a>
+                {% endif %}
+                
+                <a href="{% url 'publicites:list' %}" class="group py-4 px-6 bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-full text-white font-bold text-lg border-2 border-white/30 dark:border-white/20 shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:bg-white/30 dark:hover:bg-white/20 hover:shadow-xl">
+                    Parcourir les annonces
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vague décorative en bas -->
+    <div class="absolute bottom-0 left-0 right-0">
+        <svg class="w-full text-white dark:text-gray-900" viewBox="0 0 1440 120" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,96L60,90.7C120,85,240,75,360,58.7C480,43,600,21,720,21.3C840,21,960,43,1080,53.3C1200,64,1320,64,1380,64L1440,64L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Section Statistiques -->
+<section class="relative mb-16">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 sm:p-12 transform transition-all duration-500 hover:shadow-2xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Stat 1 -->
+            <div class="stat-card group">
+                <h3 class="text-4xl font-bold text-green-500 dark:text-green-400 mb-2 group-hover:animate-pulse">{{ total_ads|default:"500+" }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 font-medium">Équipements disponibles</p>
+            </div>
+            
+            <!-- Stat 2 -->
+            <div class="stat-card group">
+                <h3 class="text-4xl font-bold text-green-500 dark:text-green-400 mb-2 group-hover:animate-pulse">{{ total_users|default:"1200+" }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 font-medium">Agriculteurs connectés</p>
+            </div>
+            
+            <!-- Stat 3 -->
+            <div class="stat-card group">
+                <h3 class="text-4xl font-bold text-green-500 dark:text-green-400 mb-2 group-hover:animate-pulse">{{ total_categories|default:"25+" }}</h3>
+                <p class="text-gray-600 dark:text-gray-300 font-medium">Catégories d'équipements</p>
+            </div>
+            
+            <!-- Stat 4 -->
+            <div class="stat-card group">
+                <h3 class="text-4xl font-bold text-green-500 dark:text-green-400 mb-2 animate-pulse-slow">💚</h3>
+                <p class="text-gray-600 dark:text-gray-300 font-medium">Agriculture durable</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Catégories -->
+<section class="mb-16">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-white mb-12 relative inline-block w-full">
+        <span class="relative inline-block transform transition-transform duration-500 hover:scale-105">
+            🚜 Catégories d'équipements
+            <span class="absolute bottom-0 left-1/2 w-24 h-1 bg-green-500 transform -translate-x-1/2 rounded-full"></span>
+        </span>
+    </h2>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for category in popular_categories %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl p-6 transform transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                    <a href="{% url 'publicites:list' %}?category={{ category.id }}" class="hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                        {{ category.name }}
+                    </a>
+                </h3>
+                <p class="text-green-500 dark:text-green-400 font-medium mb-2">{{ category.ad_count }} équipement{{ category.ad_count|pluralize }}</p>
+                {% if category.description %}
+                    <p class="text-gray-600 dark:text-gray-300">{{ category.description|truncatewords:10 }}</p>
+                {% endif %}
+                
+                <!-- Shine effect -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000"></div>
+            </div>
+        {% empty %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl p-6 transform transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                    <a href="{% url 'publicites:list' %}" class="hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                        🚜 Tracteurs
+                    </a>
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">Tracteurs neufs et d'occasion</p>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000"></div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl p-6 transform transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                    <a href="{% url 'publicites:list' %}" class="hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                        🌾 Moissonneuses
+                    </a>
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">Équipements de récolte</p>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000"></div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl p-6 transform transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                    <a href="{% url 'publicites:list' %}" class="hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                        🔧 Outils
+                    </a>
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">Outils agricoles divers</p>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000"></div>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl p-6 transform transition-all duration-300 hover:-translate-y-2 relative overflow-hidden group">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                    <a href="{% url 'publicites:list' %}" class="hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                        🚿 Irrigation
+                    </a>
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300">Systèmes d'irrigation</p>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000"></div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-8">
+        <a href="{% url 'publicites:list' %}" class="inline-flex items-center text-green-500 dark:text-green-400 font-semibold text-lg hover:text-green-600 dark:hover:text-green-300 transition-colors">
+            Voir toutes les catégories
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+        </a>
+    </div>
+</section>
+
+<!-- Équipements récents -->
+<section class="mb-16">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-white mb-12 relative inline-block w-full">
+        <span class="relative inline-block transform transition-transform duration-500 hover:scale-105">
+            ⚡ Annonces récemment ajoutées
+            <span class="absolute bottom-0 left-1/2 w-24 h-1 bg-green-500 transform -translate-x-1/2 rounded-full"></span>
+        </span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for ad in recent_ads %}
+            <article class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:-translate-y-2 group">
+                {% if ad.is_premium %}
+                    <div class="absolute top-4 right-4 z-10">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg">
+                            ⭐ PREMIUM
+                        </span>
+                    </div>
+                {% endif %}
+                
+                <div class="relative h-56 overflow-hidden">
+                    {% if ad.images.first %}
+                        <img src="{{ ad.images.first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-500 dark:text-gray-400 italic">
+                            📷 Pas d'image
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Overlay on hover -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                        <div class="p-4 w-full">
+                            <a href="{% url 'publicites:detail' ad.pk %}" class="inline-block py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-300 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2 line-clamp-1">
+                        <a href="{% url 'publicites:detail' ad.pk %}" class="hover:text-green-500 dark:hover:text-green-400 transition-colors">
+                            {{ ad.title }}
+                        </a>
+                    </h3>
+                    
+                    <p class="text-2xl font-bold text-red-500 dark:text-red-400 mb-3">{{ ad.price }} FCFA</p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                            {{ ad.category.name }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-gray-500 dark:text-gray-400 text-sm">
+                        <div class="flex items-center">
+                            <span class="mr-1">👨‍🌾</span>
+                            <span>{{ ad.author.username }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="mr-1">📅</span>
+                            <span>{{ ad.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <article class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform transition-all duration-500 hover:-translate-y-2 group">
+                <div class="relative h-56 overflow-hidden">
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-500 dark:text-gray-400 italic">
+                        🚜 Exemple d'annonce
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+                        Tracteur John Deere 6120M
+                    </h3>
+                    
+                    <p class="text-2xl font-bold text-red-500 dark:text-red-400 mb-3">85 000 FCFA</p>
+                    
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                            Tracteurs
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between text-gray-500 dark:text-gray-400 text-sm">
+                        <div class="flex items-center">
+                            <span class="mr-1">👨‍🌾</span>
+                            <span>Pierre Martin</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-10">
+        <a href="{% url 'publicites:list' %}" class="inline-flex items-center text-green-500 dark:text-green-400 font-semibold text-lg hover:text-green-600 dark:hover:text-green-300 transition-colors group">
+            Voir tous les équipements
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+        </a>
+    </div>
+</section>
+
+<!-- Équipements premium -->
+{% if premium_ads %}
+<section class="mb-16 relative">
+    <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/10 dark:to-amber-800/10 rounded-3xl transform -skew-y-1"></div>
+    
+    <div class="relative p-8 sm:p-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-amber-800 dark:text-amber-300 mb-12 relative inline-block w-full">
+            <span class="relative inline-block transform transition-transform duration-500 hover:scale-105">
+                ⭐ Équipements Premium
+                <span class="absolute bottom-0 left-1/2 w-24 h-1 bg-amber-500 transform -translate-x-1/2 rounded-full"></span>
+            </span>
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for ad in premium_ads %}
+                <article class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transform transition-all duration-500 hover:-translate-y-2 hover:rotate-1 group">
+                    <div class="absolute top-4 right-4 z-10">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg animate-pulse-subtle">
+                            ⭐ PREMIUM
+                        </span>
+                    </div>
+                    
+                    <div class="relative h-56 overflow-hidden">
+                        {% if ad.images.first %}
+                            <img src="{{ ad.images.first.image.url }}" alt="{{ ad.title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-500 dark:text-gray-400 italic">
+                                📷 Pas d'image
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Overlay gradient -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
+                            <div class="p-4 w-full">
+                                <a href="{% url 'publicites:detail' ad.pk %}" class="inline-block py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors duration-300 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
+                                    Voir détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2 line-clamp-1">
+                            <a href="{% url 'publicites:detail' ad.pk %}" class="hover:text-amber-500 dark:hover:text-amber-400 transition-colors">
+                                {{ ad.title }}
+                            </a>
+                        </h3>
+                        
+                        <p class="text-2xl font-bold text-amber-500 dark:text-amber-400 mb-3">{{ ad.price }} FCFA</p>
+                        
+                        {% if ad.description %}
+                            <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{{ ad.description|truncatewords:15 }}</p>
+                        {% endif %}
+                        
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-800/40 text-amber-800 dark:text-amber-200">
+                                {{ ad.category.name }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-center text-gray-500 dark:text-gray-400 text-sm">
+                            <span class="mr-1">👨‍🌾</span>
+                            <span>{{ ad.author.username }}</span>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Section Comment ça marche -->
+<section class="mb-16">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-white mb-12 relative inline-block w-full">
+        <span class="relative inline-block transform transition-transform duration-500 hover:scale-105">
+            💡 Comment ça marche ?
+            <span class="absolute bottom-0 left-1/2 w-24 h-1 bg-green-500 transform -translate-x-1/2 rounded-full"></span>
+        </span>
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Étape 1 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative">
+            <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-t-2xl"></div>
+            
+            <div class="relative mx-auto w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-6 group transform transition-transform duration-500 hover:scale-110">
+                <span class="absolute inset-0 rounded-full animate-ping-slow bg-green-400 opacity-20"></span>
+                <span class="text-2xl font-bold">1</span>
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                🔐 Inscrivez-vous
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Créez votre compte agriculteur gratuitement en quelques secondes
+            </p>
+        </div>
+        
+        <!-- Étape 2 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative">
+            <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-t-2xl"></div>
+            
+            <div class="relative mx-auto w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-6 transform transition-transform duration-500 hover:scale-110">
+                <span class="absolute inset-0 rounded-full animate-ping-slow bg-green-400 opacity-20"></span>
+                <span class="text-2xl font-bold">2</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                📝 Publiez votre annonce
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Ajoutez photos, description et prix de vos annonces agricoles
+            </p>
+        </div>
+        
+        <!-- Étape 3 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative">
+            <div class="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-green-400 to-green-600 rounded-t-2xl"></div>
+            
+            <div class="relative mx-auto w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-6 transform transition-transform duration-500 hover:scale-110">
+                <span class="absolute inset-0 rounded-full animate-ping-slow bg-green-400 opacity-20"></span>
+                <span class="text-2xl font-bold">3</span>
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                🤝 Échangez rapidement
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Connectez-vous directement avec d'autres agriculteurs
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Section CTA Finale -->
+<section class="mb-16 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-800 rounded-3xl shadow-2xl shadow-blue-500/20 dark:shadow-blue-800/30 p-12 text-center text-white relative z-10 transform transition-all duration-500 hover:shadow-blue-500/30">
+        <!-- Motif de fond -->
+        <div class="absolute inset-0 overflow-hidden opacity-10">
+            <div class="absolute -inset-[100%] bg-grid-white/20 transform rotate-45"></div>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-tight transform transition-transform duration-500 hover:scale-105">
+            🚀 Rejoignez la révolution agricole !
+        </h2>
+        
+        <p class="text-xl opacity-90 max-w-3xl mx-auto mb-8">
+            Connectez-vous avec des milliers d'agriculteurs qui modernisent leur exploitation
+        </p>
+        
+        {% if not user.is_authenticated %}
+            <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto">
+                <a href="{% url 'users:register' %}" class="group relative py-4 px-8 bg-white text-blue-600 font-bold text-lg rounded-full shadow-lg shadow-blue-700/30 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden">
+                    <span class="relative z-10">Créer mon compte</span>
+                    <span class="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
+                </a>
+                
+                <a href="{% url 'publicites:list' %}" class="group py-4 px-8 bg-transparent rounded-full text-white font-bold text-lg border-2 border-white/30 shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:bg-white/10 hover:shadow-xl">
+                    Explorer sans compte
+                </a>
+            </div>
+        {% else %}
+            <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto">
+                <a href="{% url 'publicites:create' %}" class="group relative py-4 px-8 bg-white text-blue-600 font-bold text-lg rounded-full shadow-lg shadow-blue-700/30 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden">
+                    <span class="relative z-10">Publier une annonce</span>
+                    <span class="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
+                </a>
+                
+                <a href="{% url 'publicites:list' %}" class="group py-4 px-8 bg-transparent rounded-full text-white font-bold text-lg border-2 border-white/30 shadow-lg transform transition-all duration-300 hover:-translate-y-1 hover:bg-white/10 hover:shadow-xl">
+                    Les annonces
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Section Pourquoi Nous Choisir -->
+<section class="mb-16">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 dark:text-white mb-12 relative inline-block w-full">
+        <span class="relative inline-block transform transition-transform duration-500 hover:scale-105">
+            🌟 Pourquoi choisir AgroSmart ?
+            <span class="absolute bottom-0 left-1/2 w-24 h-1 bg-green-500 transform -translate-x-1/2 rounded-full"></span>
+        </span>
+    </h2>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Feature 1 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 group">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-2xl text-green-600 dark:text-green-400 mx-auto mb-6 transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                🔒
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                Sécurisé
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Vos données agricoles sont protégées et vos transactions sécurisées
+            </p>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 group">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-2xl text-green-600 dark:text-green-400 mx-auto mb-6 transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                💰
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                Économique
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Trouvez les meilleurs prix pour vos équipements agricoles
+            </p>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 group">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-2xl text-green-600 dark:text-green-400 mx-auto mb-6 transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                📱
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                Intelligent
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Plateforme conçue spécialement pour les agriculteurs modernes
+            </p>
+        </div>
+        
+        <!-- Feature 4 -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 text-center transform transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 group">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-2xl text-green-600 dark:text-green-400 mx-auto mb-6 transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                🚀
+            </div>
+            
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                Efficace
+            </h3>
+            
+            <p class="text-gray-600 dark:text-gray-300">
+                Trouvez et vendez vos équipements en quelques clics
+            </p>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Animations personnalisées */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes pingSlower {
+        0% { transform: scale(1); opacity: 0.2; }
+        70% { transform: scale(1.7); opacity: 0; }
+        100% { transform: scale(1.7); opacity: 0; }
+    }
+    
+    @keyframes pulseSubtle {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 1s ease-out;
+    }
+    
+    .animate-ping-slow {
+        animation: pingSlower 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    
+    .animate-pulse-slow {
+        animation: pulseSubtle 3s infinite;
+    }
+    
+    .animate-pulse-subtle {
+        animation: pulseSubtle 2s infinite;
+    }
+    
+    .text-shadow-lg {
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
+    
+    .stat-card {
+        @apply text-center p-4 rounded-xl transition-all duration-300 hover:-translate-y-1;
+    }
+    
+    .bg-grid-white {
+        background-size: 40px 40px;
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px),  linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+    }
+    
+    .line-clamp-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<script>
+    // Support du mode sombre
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    });
+</script>
+{% endblock %}
