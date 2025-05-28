@@ -168,6 +168,33 @@
         font-size: 1.1rem;
     }
     
+    /* Style pour le bouton de retour aux annonces */
+    .btn-outline-primary {
+        border: 2px solid var(--primary-color);
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-top: 1.5rem;
+        background-color: transparent;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+    }
+    
+    .btn-outline-primary i {
+        font-size: 1.1rem;
+    }
+    
     /* Éléments amusants pour le chatbot */
     .agrobot-quote {
         background-color: rgba(46, 125, 50, 0.05);
@@ -371,6 +398,16 @@
         .wisdom-label {
             color: #ccc;
         }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: #e0e0e0;
+        }
     }
 </style>
 {% endblock %}
@@ -466,9 +503,12 @@
                     {% endif %}
                 {% endwith %}
                 
-                <div class="text-center">
+                <div class="text-center d-flex flex-column flex-sm-row gap-3 justify-content-center">
                     <a href="{% url 'chatbot:interface' %}" class="btn chatbot-btn">
                         <i class="bi bi-robot"></i> Parler à AgroBot
+                    </a>
+                    <a href="http://13.49.80.211:8000" class="btn btn-outline-primary">
+                        <i class="bi bi-megaphone"></i> Retour aux annonces
                     </a>
                 </div>
             </div>
