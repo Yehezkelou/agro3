@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Pratiques pour {{ saison }} | Agrosmart{% endblock %}
+{% load custom_filters %}
+
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page des pratiques par saison */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(46, 125, 50, 0.1);
+    }
+    
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        background-color: rgba(46, 125, 50, 0.1);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .page-header .btn-back {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 50px;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .page-header .btn-back:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateX(-5px);
+    }
+    
+    .pratique-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .pratique-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .pratique-card .card-header {
+        padding: 1rem 1.5rem;
+        border-bottom: none;
+        position: relative;
+    }
+    
+    .pratique-card .card-header.bg-primary {
+        background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+    }
+    
+    .pratique-card .card-header.bg-warning {
+        background: linear-gradient(135deg, #FF9800, #FF8F00) !important;
+    }
+    
+    .pratique-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .pratique-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .pratique-card .card-subtitle {
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    .pratique-card .card-subtitle a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .pratique-card .card-subtitle a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+    
+    .pratique-card .card-text {
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .difficulty-container {
+        margin-bottom: 1.5rem;
+    }
+    
+    .difficulty-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .progress {
+        height: 10px;
+        border-radius: 50px;
+        background-color: rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        border-radius: 50px;
+    }
+    
+    .progress-bar.bg-success {
+        background: linear-gradient(to right, #4CAF50, #2E7D32) !important;
+    }
+    
+    .progress-bar.bg-warning {
+        background: linear-gradient(to right, #FFC107, #FF8F00) !important;
+    }
+    
+    .progress-bar.bg-danger {
+        background: linear-gradient(to right, #F44336, #C62828) !important;
+    }
+    
+    .pratique-card .card-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+    
+    .btn-avantages {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 50px;
+        padding: 0.4rem 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-avantages:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-avantages i {
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-avantages[aria-expanded="true"] i {
+        transform: rotate(45deg);
+    }
+    
+    .avantages-content {
+        margin-top: 1rem;
+        border-radius: 0.5rem;
+        padding: 1.2rem;
+        background-color: rgba(46, 125, 50, 0.05);
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    .empty-alert {
+        background-color: rgba(33, 150, 243, 0.1);
+        border-left: 4px solid #2196F3;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .empty-alert i {
+        font-size: 2rem;
+        color: #2196F3;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.6rem;
+        }
+        
+        .page-header .btn-back {
+            align-self: flex-start;
+        }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .page-header {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-header h1 i {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .pratique-card .card-text {
+            color: #e0e0e0;
+        }
+        
+        .pratique-card .card-subtitle {
+            color: #aaa;
+        }
+        
+        .progress {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .pratique-card .card-footer {
+            border-top-color: rgba(255, 255, 255, 0.05);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .avantages-content {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .empty-alert {
+            background-color: rgba(33, 150, 243, 0.2);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>
+        <i class="bi bi-{% if saison == 'PLUIE' %}cloud-rain{% else %}sun{% endif %}"></i>
+        Pratiques pour {{ view.get_saison_display }}
+    </h1>
+    <a href="{% url 'agriculture:conseils' %}" class="btn btn-back">
+        <i class="bi bi-arrow-left"></i> Retour aux conseils
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for pratique in object_list %}
+    <div class="col-md-6 col-lg-6 mb-4">
+        <div class="card pratique-card h-100">
+            <div class="card-header bg-{% if pratique.saison == 'PLUIE' %}primary{% else %}warning{% endif %} text-white">
+                <h5 class="card-title">
+                    <i class="bi bi-{% if pratique.saison == 'PLUIE' %}umbrella{% else %}sun{% endif %}"></i>
+                    {{ pratique.nom }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 class="card-subtitle">
+                    Pour: <a href="{% url 'agriculture:detail_culture' pratique.culture.id %}">{{ pratique.culture.nom }}</a>
+                </h6>
+                <p class="card-text">{{ pratique.description }}</p>
+                
+                <div class="difficulty-container">
+                    <div class="difficulty-label">
+                        <span>Niveau de difficulté</span>
+                        <span class="
+                            {% if pratique.difficulte <= 2 %}
+                                text-success
+                            {% elif pratique.difficulte <= 4 %}
+                                text-warning
+                            {% else %}
+                                text-danger
+                            {% endif %}">
+                            {{ pratique.difficulte }}/5
+                        </span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar 
+                            {% if pratique.difficulte <= 2 %}
+                                bg-success
+                            {% elif pratique.difficulte <= 4 %}
+                                bg-warning
+                            {% else %}
+                                bg-danger
+                            {% endif %}"
+                            role="progressbar" 
+                            style="width: {{ pratique.difficulte|mul:20 }}%;"
+                            aria-valuenow="{{ pratique.difficulte }}" 
+                            aria-valuemin="1" 
+                            aria-valuemax="5">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-sm btn-avantages" data-bs-toggle="collapse" 
+                        data-bs-target="#avantages-{{ pratique.id }}" 
+                        aria-expanded="false" 
+                        aria-controls="avantages-{{ pratique.id }}">
+                    <i class="bi bi-plus-circle"></i> Voir les avantages
+                </button>
+                <div class="collapse" id="avantages-{{ pratique.id }}">
+                    <div class="avantages-content">
+                        {{ pratique.avantages }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="empty-alert">
+            <i class="bi bi-info-circle"></i>
+            <div>
+                <h4 class="fw-bold mb-1">Aucune pratique disponible</h4>
+                <p class="mb-0">Aucune pratique n'est actuellement disponible pour cette saison. Veuillez consulter les autres catégories ou revenir plus tard.</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation des boutons d'avantages
+        document.querySelectorAll('.btn-avantages').forEach(button => {
+            button.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                
+                if (this.getAttribute('aria-expanded') === 'true') {
+                    this.innerHTML = '<i class="bi bi-plus-circle"></i> Voir les avantages';
+                } else {
+                    this.innerHTML = '<i class="bi bi-dash-circle"></i> Masquer les avantages';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

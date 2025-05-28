@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pratique.nom }} | Agrosmart{% endblock %}
+
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page de détail de pratique */
+    .breadcrumb {
+        background-color: rgba(46, 125, 50, 0.1);
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .breadcrumb-item.active {
+        color: #555;
+        font-weight: 500;
+    }
+    
+    .breadcrumb-item+.breadcrumb-item::before {
+        color: var(--primary-color);
+    }
+    
+    .pratique-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .pratique-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 2rem;
+        position: relative;
+    }
+    
+    .pratique-header h1 {
+        color: white;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 0 0 1rem;
+    }
+    
+    .pratique-badge {
+        padding: 0.6rem 1rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .pratique-badge i {
+        font-size: 1rem;
+    }
+    
+    .pratique-badge.bg-primary {
+        background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+    }
+    
+    .pratique-badge.bg-info {
+        background: linear-gradient(135deg, #00BCD4, #0097A7) !important;
+    }
+    
+    .pratique-body {
+        padding: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin: 0 0 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-bottom: 2px solid rgba(46, 125, 50, 0.1);
+        padding-bottom: 0.75rem;
+    }
+    
+    .section-title i {
+        color: var(--primary-color);
+        font-size: 1.4rem;
+    }
+    
+    .lead-text {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #444;
+        margin-bottom: 2rem;
+    }
+    
+    .avantages-card {
+        background-color: rgba(46, 125, 50, 0.05);
+        border-left: 4px solid var(--primary-color);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        line-height: 1.7;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .info-card {
+        background-color: rgba(46, 125, 50, 0.05);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-card h5 {
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-card i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .star-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .star-rating i {
+        font-size: 1.5rem;
+    }
+    
+    .star-filled.easy {
+        color: #2E7D32;
+    }
+    
+    .star-filled.medium {
+        color: #FF8F00;
+    }
+    
+    .star-filled.hard {
+        color: #C62828;
+    }
+    
+    .star-empty {
+        color: #ccc;
+    }
+    
+    .difficulty-text {
+        margin-left: 0.75rem;
+        font-weight: 500;
+        font-size: 1rem;
+    }
+    
+    .sidebar-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .sidebar-card .card-header {
+        padding: 1.2rem 1.5rem;
+        border-bottom: none;
+    }
+    
+    .sidebar-card .card-header.bg-primary {
+        background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+    }
+    
+    .sidebar-card .card-header.bg-warning {
+        background: linear-gradient(135deg, #FFC107, #FF8F00) !important;
+    }
+    
+    .sidebar-card .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .culture-image-container {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border: 4px solid white;
+    }
+    
+    .culture-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    .culture-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.25rem;
+    }
+    
+    .culture-type {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        background-color: rgba(46, 125, 50, 0.1);
+        color: var(--primary-dark);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-view-culture {
+        background: linear-gradient(135deg, #2196F3, #1976D2);
+        border: none;
+        color: white;
+        border-radius: 50px;
+        padding: 0.7rem 1.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-view-culture:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        color: white;
+    }
+    
+    .btn-view-culture i {
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-view-culture:hover i {
+        transform: translateX(3px);
+    }
+    
+    .material-list {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .material-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .material-item:last-child {
+        border-bottom: none;
+    }
+    
+    .material-icon {
+        width: 35px;
+        height: 35px;
+        background-color: rgba(46, 125, 50, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .material-icon i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+    
+    .material-text {
+        font-weight: 500;
+        color: #444;
+    }
+    
+    @media (max-width: 768px) {
+        .pratique-header {
+            padding: 1.5rem;
+        }
+        
+        .pratique-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .pratique-body {
+            padding: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+        }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .breadcrumb {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .breadcrumb-item.active {
+            color: #e0e0e0;
+        }
+        
+        .lead-text {
+            color: #e0e0e0;
+        }
+        
+        .info-card {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .avantages-card {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .star-empty {
+            color: #555;
+        }
+        
+        .culture-image-container {
+            border-color: #333;
+        }
+        
+        .culture-type {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+        
+        .material-item {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .material-icon {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .material-text {
+            color: #e0e0e0;
+        }
+        
+        .section-title {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'agriculture:conseils' %}">Conseils</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ pratique.nom }}</li>
+            </ol>
+        </nav>
+
+        <div class="card pratique-card">
+            <div class="pratique-header">
+                <h1>{{ pratique.nom }}</h1>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="pratique-badge bg-primary">
+                        <i class="bi bi-tag"></i> {{ pratique.culture.nom }}
+                    </span>
+                    <span class="pratique-badge bg-info">
+                        <i class="bi bi-calendar"></i> {{ pratique.get_saison_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="pratique-body">
+                <h3 class="section-title"><i class="bi bi-journal-text"></i> Description</h3>
+                <p class="lead-text">{{ pratique.description }}</p>
+                
+                <h3 class="section-title"><i class="bi bi-award"></i> Avantages</h3>
+                <div class="avantages-card">
+                    {{ pratique.avantages }}
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h5><i class="bi bi-speedometer2"></i> Difficulté</h5>
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= pratique.difficulte %}
+                                    <i class="bi bi-star-fill star-filled 
+                                        {% if pratique.difficulte <= 2 %}easy{% elif pratique.difficulte <= 4 %}medium{% else %}hard{% endif %}"></i>
+                                {% else %}
+                                    <i class="bi bi-star star-empty"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="difficulty-text 
+                                {% if pratique.difficulte <= 2 %}text-success{% elif pratique.difficulte <= 4 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ pratique.difficulte }}/5
+                            </span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h5><i class="bi bi-calendar-date"></i> Période recommandée</h5>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-{% if pratique.saison == 'PLUIE' %}primary{% else %}warning{% endif %} pratique-badge">
+                                <i class="bi bi-{% if pratique.saison == 'PLUIE' %}cloud-rain{% else %}sun{% endif %}"></i>
+                                {{ pratique.get_saison_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sidebar-card">
+            <div class="card-header bg-primary text-white">
+                <h3><i class="bi bi-tree"></i> Culture associée</h3>
+            </div>
+            <div class="card-body text-center p-4">
+                {% if pratique.culture.image %}
+                <div class="culture-image-container">
+                    <img src="{{ pratique.culture.image.url }}" class="culture-image" alt="{{ pratique.culture.nom }}">
+                </div>
+                {% endif %}
+                <h4 class="culture-title">{{ pratique.culture.nom }}</h4>
+                <span class="culture-type">{{ pratique.culture.get_type_culture_display }}</span>
+                <a href="{% url 'agriculture:detail_culture' pratique.culture.id %}" class="btn btn-view-culture">
+                    <i class="bi bi-box-arrow-up-right"></i> Voir la fiche culture
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-card">
+            <div class="card-header bg-warning text-dark">
+                <h3><i class="bi bi-tools"></i> Matériel nécessaire</h3>
+            </div>
+            <div class="card-body p-4">
+                <ul class="material-list">
+                    <li class="material-item">
+                        <div class="material-icon">
+                            <i class="bi bi-shovel"></i>
+                        </div>
+                        <span class="material-text">Outils de base (pelle, râteau)</span>
+                    </li>
+                    <li class="material-item">
+                        <div class="material-icon">
+                            <i class="bi bi-droplet"></i>
+                        </div>
+                        <span class="material-text">Système d'irrigation</span>
+                    </li>
+                    <li class="material-item">
+                        <div class="material-icon">
+                            <i class="bi bi-flower1"></i>
+                        </div>
+                        <span class="material-text">Engrais organique</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

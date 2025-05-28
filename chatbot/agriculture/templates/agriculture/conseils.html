@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Conseils Agricoles | Agrosmart{% endblock %}
+
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page de conseils */
+    .page-header {
+        position: relative;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .page-header h2 {
+        margin: 0;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header i {
+        font-size: 1.8rem;
+    }
+    
+    .conseil-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+        height: 100%;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    
+    .conseil-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .conseil-card .card-img-top {
+        height: 180px;
+        object-fit: cover;
+    }
+    
+    .conseil-card .card-title {
+        font-weight: 600;
+        color: var(--primary-dark);
+    }
+    
+    .conseil-card .card-subtitle {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .conseil-card .card-text {
+        color: #555;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .conseil-card .card-footer {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .badge {
+        padding: 0.5rem 0.75rem;
+        font-weight: 500;
+        border-radius: 50px;
+    }
+    
+    .btn-outline-primary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .section-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .section-card .card-header {
+        padding: 1rem 1.5rem;
+        border-bottom: none;
+    }
+    
+    .section-card .card-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-select, .form-control {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+        background-color: #f9f9f9;
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+    }
+    
+    .astuce-card {
+        background-color: #f8fffa;
+        border-left: 5px solid var(--primary-light);
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .astuce-card h5 {
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .astuce-card p {
+        margin-bottom: 0.75rem;
+    }
+    
+    .astuce-card hr {
+        opacity: 0.1;
+        margin: 0.75rem 0;
+    }
+    
+    .astuce-card small {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6c757d;
+    }
+    
+    /* Styles pour les boutons de filtre */
+    .filter-btn {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+    
+    /* Couleurs de difficulté */
+    .bg-success {
+        background-color: #2e7d32 !important;
+    }
+    
+    .bg-warning {
+        background-color: #ff8f00 !important;
+    }
+    
+    .bg-danger {
+        background-color: #c62828 !important;
+    }
+    
+    .bg-info {
+        background-color: #0288d1 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .conseil-card .card-img-top {
+            height: 160px;
+        }
+        
+        .page-header {
+            padding: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="bi bi-book"></i> Nos Conseils Agricoles</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+            {% for pratique in pratiques_recentes %}
+            <div class="col">
+                <div class="card conseil-card h-100">
+                    {% if pratique.culture.image %}
+                    <img src="{{ pratique.culture.image.url }}" class="card-img-top" alt="{{ pratique.culture.nom }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ pratique.nom }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Pour {{ pratique.culture.nom }}
+                        </h6>
+                        <p class="card-text">{{ pratique.description|truncatewords:25 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-{% if pratique.difficulte <= 2 %}success{% elif pratique.difficulte <= 4 %}warning{% else %}danger{% endif %}">
+                                Difficulté: {{ pratique.difficulte }}/5
+                            </span>
+                            <a href="{% url 'agriculture:detail_pratique' pratique.id %}" class="btn btn-sm btn-outline-primary">Voir détails</a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>
+                            <i class="bi bi-calendar"></i> 
+                            Saison: {{ pratique.get_saison_display }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card section-card">
+            <div class="card-header bg-success text-white">
+                <h3><i class="bi bi-filter-circle"></i> Filtres</h3>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Type de culture</label>
+                        <select class="form-select" name="culture_type">
+                            <option value="">Toutes</option>
+                            {% for type in culture_types %}
+                            <option value="{{ type.0 }}">{{ type.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Saison</label>
+                        <select class="form-select" name="saison">
+                            <option value="">Toutes</option>
+                            {% for saison in saisons %}
+                            <option value="{{ saison.0 }}">{{ saison.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn filter-btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Filtrer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card section-card">
+            <div class="card-header bg-info text-white">
+                <h3><i class="bi bi-lightbulb"></i> Astuce du Jour</h3>
+            </div>
+            <div class="card-body">
+                <div class="astuce-card">
+                    <h5>Rotation des cultures</h5>
+                    <p>Alterner les cultures sur une même parcelle améliore la fertilité du sol et réduit les maladies.</p>
+                    <hr>
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check"></i> Conseil vérifié par nos experts
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

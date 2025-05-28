@@ -1,0 +1,173 @@
+<!-- formations/includes/filters.html -->
+{% load i18n %}
+
+<div class="filters-section bg-light p-4 rounded mb-4">
+    <form method="get" class="formation-filters">
+        <div class="row">
+            <!-- Recherche -->
+            <div class="col-md-3 mb-3">
+                <label for="search" class="form-label">{% trans "Recherche" %}</label>
+                <div class="input-group">
+                    <input type="text" 
+                           class="form-control" 
+                           id="search" 
+                           name="search" 
+                           value="{{ current_search|default:'' }}" 
+                           placeholder="Titre, description...">
+                    <button class="btn btn-outline-secondary" type="button" id="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Catégorie -->
+            <div class="col-md-2 mb-3">
+                <label for="category" class="form-label">{% trans "Catégorie" %}</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">{% trans "Toutes" %}</option>
+                    {% for category in categories %}
+                        <option value="{{ category.slug }}" 
+                                {% if current_category == category.slug %}selected{% endif %}>
+                            {{ category.name }} ({{ category.formation_count }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Niveau -->
+            <div class="col-md-2 mb-3">
+                <label for="difficulty" class="form-label">{% trans "Niveau" %}</label>
+                <select class="form-select" id="difficulty" name="difficulty">
+                    <option value="">{% trans "Tous niveaux" %}</option>
+                    {% for key, value in difficulty_choices %}
+                        <option value="{{ key }}" 
+                                {% if current_difficulty == key %}selected{% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Prix -->
+            <div class="col-md-2 mb-3">
+                <label for="price" class="form-label">{% trans "Prix" %}</label>
+                <select class="form-select" id="price" name="price">
+                    <option value="">{% trans "Tous" %}</option>
+                    <option value="free" {% if current_price_filter == 'free' %}selected{% endif %}>
+                        {% trans "Gratuit" %}
+                    </option>
+                    <option value="paid" {% if current_price_filter == 'paid' %}selected{% endif %}>
+                        {% trans "Payant" %}
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Tri -->
+            <div class="col-md-2 mb-3">
+                <label for="sort" class="form-label">{% trans "Trier par" %}</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>
+                        {% trans "Plus récent" %}
+                    </option>
+                    <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>
+                        {% trans "Populaire" %}
+                    </option>
+                    <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>
+                        {% trans "Prix croissant" %}
+                    </option>
+                    <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>
+                        {% trans "Prix décroissant" %}
+                    </option>
+                    <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>
+                        {% trans "Mieux notés" %}
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Boutons -->
+            <div class="col-md-1 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-filter"></i>
+                </button>
+                <a href="{% url 'formations:list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filtres actifs -->
+        {% if current_search or current_category or current_difficulty or current_price_filter %}
+            <div class="active-filters mt-3">
+                <h6>{% trans "Filtres actifs:" %}</h6>
+                <div class="filter-tags">
+                    {% if current_search %}
+                        <span class="badge bg-info me-2">
+                            {% trans "Recherche:" %} {{ current_search }}
+                            <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_difficulty %}difficulty={{ current_difficulty }}&{% endif %}{% if current_price_filter %}price={{ current_price_filter }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" 
+                               class="text-decoration-none text-white ms-1">×</a>
+                        </span>
+                    {% endif %}
+                    
+                    {% if current_category %}
+                        {% for category in categories %}
+                            {% if category.slug == current_category %}
+                                <span class="badge bg-primary me-2">
+                                    {{ category.name }}
+                                    <a href="?{% if current_search %}search={{ current_search }}&{% endif %}{% if current_difficulty %}difficulty={{ current_difficulty }}&{% endif %}{% if current_price_filter %}price={{ current_price_filter }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" 
+                                       class="text-decoration-none text-white ms-1">×</a>
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if current_difficulty %}
+                        {% for key, value in difficulty_choices %}
+                            {% if key == current_difficulty %}
+                                <span class="badge bg-secondary me-2">
+                                    {{ value }}
+                                    <a href="?{% if current_search %}search={{ current_search }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_price_filter %}price={{ current_price_filter }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" 
+                                       class="text-decoration-none text-white ms-1">×</a>
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if current_price_filter %}
+                        <span class="badge bg-success me-2">
+                            {% if current_price_filter == 'free' %}{% trans "Gratuit" %}{% else %}{% trans "Payant" %}{% endif %}
+                            <a href="?{% if current_search %}search={{ current_search }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_difficulty %}difficulty={{ current_difficulty }}&{% endif %}{% if current_sort %}sort={{ current_sort }}{% endif %}" 
+                               class="text-decoration-none text-white ms-1">×</a>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Soumission automatique du formulaire lors des changements
+    const selects = document.querySelectorAll('.formation-filters select');
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Recherche en temps réel (optionnel)
+    const searchInput = document.getElementById('search');
+    const searchBtn = document.getElementById('search-btn');
+    
+    searchBtn.addEventListener('click', function() {
+        searchInput.form.submit();
+    });
+    
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.form.submit();
+        }
+    });
+});
+</script>

@@ -1,0 +1,167 @@
+<!-- Modal de progression -->
+<div id="progressModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Mettre à jour la progression" %}</h3>
+                    <button onclick="closeProgressModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="progressForm">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="progressSlider" class="block text-sm font-medium text-gray-700 mb-2">
+                            {% trans "Progression" %}: <span id="progressValue">{{ enrollment.progress_percentage }}%</span>
+                        </label>
+                        <input type="range" 
+                               id="progressSlider" 
+                               name="progress" 
+                               min="0" 
+                               max="100" 
+                               value="{{ enrollment.progress_percentage }}" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-info-circle text-blue-600 mt-0.5 text-sm"></i>
+                            <p class="text-sm text-blue-800">
+                                {% trans "Mettez à jour votre progression pour suivre votre avancement dans la formation." %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                            {% trans "Mettre à jour" %}
+                        </button>
+                        <button type="button" onclick="closeProgressModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                            {% trans "Annuler" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openProgressModal() {
+    document.getElementById('progressModal').classList.remove('hidden');
+}
+
+function closeProgressModal() {
+    document.getElementById('progressModal').classList.add('hidden');
+}
+
+// Mise à jour en temps réel de la valeur du slider
+document.getElementById('progressSlider').addEventListener('input', function() {
+    document.getElementById('progressValue').textContent = this.value + '%';
+});
+
+// Soumission du formulaire de progression
+document.getElementById('progressForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{% trans "Mise à jour..." %}';
+    
+    fetch('{% url "formations:update_progress" slug=formation.slug %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mettre à jour l'affichage de la progression
+            const progressBar = document.querySelector('.progress-bar');
+            const progressText = document.querySelector('.progress-text');
+            
+            if (progressBar) {
+                progressBar.style.width = data.progress + '%';
+            }
+            if (progressText) {
+                progressText.textContent = data.progress + '%';
+            }
+            
+            // Afficher message de succès
+            showAlert('success', '{% trans "Progression mise à jour avec succès !" %}');
+            
+            // Fermer le modal
+            closeProgressModal();
+            
+            // Si terminé, afficher félicitations
+            if (data.completed) {
+                showCompletionModal();
+            }
+        } else {
+            showAlert('error', data.error || '{% trans "Erreur lors de la mise à jour" %}');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', '{% trans "Erreur de connexion" %}');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+});
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' : 'bg-red-100 border border-red-400 text-red-700'
+    }`;
+    alertDiv.innerHTML = `
+        <div class="flex items-center space-x-2">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+function showCompletionModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-center">
+            <div class="mb-4">
+                <i class="fas fa-trophy text-yellow-500 text-5xl mb-2"></i>
+                <h3 class="text-xl font-bold text-gray-900">{% trans "Félicitations !" %}</h3>
+            </div>
+            <p class="text-gray-600 mb-6">{% trans "Vous avez terminé cette formation avec succès !" %}</p>
+            <button onclick="this.parentElement.parentElement.remove()" class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                {% trans "Continuer" %}
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    setTimeout(() => {
+        modal.remove();
+    }, 10000);
+}
+</script>

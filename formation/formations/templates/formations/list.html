@@ -1,0 +1,165 @@
+<!-- formations/list.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Formations</title>
+</head>
+<body>
+    <header>
+        <h1>Formations Disponibles</h1>
+        <p>{{ total_formations }} formation{{ total_formations|pluralize }} trouvée{{ total_formations|pluralize }}</p>
+    </header>
+
+    <!-- Barre de recherche et filtres -->
+    <section class="filters">
+        <form method="get">
+            <div class="search-bar">
+                <input type="text" name="search" placeholder="Rechercher une formation..." value="{{ current_search }}">
+                <button type="submit">Rechercher</button>
+            </div>
+
+            <div class="filter-options">
+                <select name="category">
+                    <option value="">Toutes les catégories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if current_category == category.slug %}selected{% endif %}>
+                            {{ category.name }} ({{ category.formation_count }})
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select name="difficulty">
+                    <option value="">Tous les niveaux</option>
+                    {% for value, label in difficulty_choices %}
+                        <option value="{{ value }}" {% if current_difficulty == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select name="price">
+                    <option value="">Tous les prix</option>
+                    <option value="free" {% if current_price_filter == 'free' %}selected{% endif %}>Gratuit</option>
+                    <option value="paid" {% if current_price_filter == 'paid' %}selected{% endif %}>Payant</option>
+                </select>
+
+                <select name="sort">
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Plus récent</option>
+                    <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Plus populaire</option>
+                    <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Prix croissant</option>
+                    <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Prix décroissant</option>
+                    <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Mieux notés</option>
+                </select>
+
+                <button type="submit">Filtrer</button>
+                <a href="{% url 'formations:list' %}">Réinitialiser</a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Formations en vedette -->
+    {% if featured_formations %}
+    <section class="featured-formations">
+        <h2>Formations en Vedette</h2>
+        <div class="formation-grid">
+            {% for formation in featured_formations %}
+                <div class="formation-card featured">
+                    {% if formation.thumbnail %}
+                        <img src="{{ formation.thumbnail.url }}" alt="{{ formation.title }}">
+                    {% endif %}
+                    <div class="formation-info">
+                        <span class="badge">En Vedette</span>
+                        <h3><a href="{{ formation.get_absolute_url }}">{{ formation.title }}</a></h3>
+                        <p>{{ formation.short_description }}</p>
+                        <div class="formation-meta">
+                            <span class="category">{{ formation.category.name }}</span>
+                            <span class="difficulty">{{ formation.get_difficulty_display }}</span>
+                            <span class="duration">{{ formation.duration }}h</span>
+                        </div>
+                        <div class="formation-price">
+                            {% if formation.is_free %}
+                                <span class="price-free">Gratuit</span>
+                            {% else %}
+                                {% if formation.is_on_sale %}
+                                    <span class="original-price">{{ formation.original_price }} CFA</span>
+                                    <span class="discount">-{{ formation.discount_percentage }}%</span>
+                                {% endif %}
+                                <span class="price">{{ formation.price }} CFA</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Liste des formations -->
+    <section class="formations-list">
+        <div class="formation-grid">
+            {% for formation in formations %}
+                <div class="formation-card">
+                    {% if formation.thumbnail %}
+                        <img src="{{ formation.thumbnail.url }}" alt="{{ formation.title }}">
+                    {% endif %}
+                    <div class="formation-info">
+                        <h3><a href="{{ formation.get_absolute_url }}">{{ formation.title }}</a></h3>
+                        <p>{{ formation.short_description }}</p>
+                        <div class="formation-meta">
+                            <span class="category">{{ formation.category.name }}</span>
+                            <span class="difficulty">{{ formation.get_difficulty_display }}</span>
+                            <span class="duration">{{ formation.duration }}h</span>
+                        </div>
+                        <div class="formation-stats">
+                            <span class="enrolled">{{ formation.enrolled_count }} inscrits</span>
+                            {% if formation.is_full %}
+                                <span class="full-badge">Complet</span>
+                            {% endif %}
+                        </div>
+                        <div class="formation-price">
+                            {% if formation.is_free %}
+                                <span class="price-free">Gratuit</span>
+                            {% else %}
+                                {% if formation.is_on_sale %}
+                                    <span class="original-price">{{ formation.original_price }} CFA</span>
+                                    <span class="discount">-{{ formation.discount_percentage }}%</span>
+                                {% endif %}
+                                <span class="price">{{ formation.price }} CFA</span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ formation.get_absolute_url }}" class="btn-primary">Voir Détails</a>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="no-results">
+                    <h3>Aucune formation trouvée</h3>
+                    <p>Essayez de modifier vos critères de recherche.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">&laquo; Précédent</a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Suivant &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+</body>
+</html>

@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block title %}Profil | Agrosmart{% endblock %}
+
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page de profil */
+    .profile-section {
+        margin-bottom: 2rem;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+    
+    .profile-card .card-header {
+        background: linear-gradient(135deg, #00BCD4, #0097A7);
+        padding: 1.2rem 1.5rem;
+        border-bottom: none;
+    }
+    
+    .profile-card .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .avatar-container {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin: 2rem auto;
+        background-color: rgba(0, 188, 212, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 4px solid white;
+    }
+    
+    .avatar {
+        font-size: 4rem;
+        color: #00BCD4;
+    }
+    
+    .username {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .member-since {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-stat {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        background-color: rgba(0, 188, 212, 0.05);
+        margin-bottom: 0.75rem;
+    }
+    
+    .profile-stat i {
+        font-size: 1.25rem;
+        color: #00BCD4;
+    }
+    
+    .profile-stat-text {
+        font-weight: 500;
+        color: #444;
+    }
+    
+    .conversations-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 1.2rem 1.5rem;
+        border-bottom: none;
+    }
+    
+    .conversations-card .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .conversations-list {
+        margin-top: 1rem;
+    }
+    
+    .conversation-item {
+        border-radius: 0.75rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .conversation-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .conversation-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 5px;
+        background-color: var(--primary-color);
+    }
+    
+    .conversation-item .conversation-title {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .conversation-item .conversation-time {
+        font-size: 0.85rem;
+        color: #888;
+    }
+    
+    .conversation-item .conversation-subject {
+        color: #555;
+    }
+    
+    .chatbot-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-top: 1.5rem;
+    }
+    
+    .chatbot-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
+        color: white;
+    }
+    
+    .chatbot-btn i {
+        font-size: 1.1rem;
+    }
+    
+    /* Éléments amusants pour le chatbot */
+    .agrobot-quote {
+        background-color: rgba(46, 125, 50, 0.05);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+    
+    .agrobot-quote::before {
+        content: """;
+        position: absolute;
+        top: -10px;
+        left: 10px;
+        font-size: 3rem;
+        color: rgba(46, 125, 50, 0.2);
+        font-family: Georgia, serif;
+    }
+    
+    .agrobot-quote p {
+        font-style: italic;
+        color: #444;
+        margin-bottom: 0.5rem;
+    }
+    
+    .agrobot-quote-author {
+        text-align: right;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .agrobot-suggestion {
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+    }
+    
+    .agrobot-suggestion h5 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .agrobot-suggestion-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background-color: rgba(46, 125, 50, 0.05);
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .agrobot-suggestion-item:hover {
+        background-color: rgba(46, 125, 50, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .agrobot-suggestion-item i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+    
+    .robot-avatar-container {
+        position: relative;
+    }
+    
+    .robot-avatar {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .robot-thinking {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: rgba(46, 125, 50, 0.1);
+        border: 2px solid var(--primary-color);
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.7;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .farming-wisdom-meter {
+        display: flex;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    
+    .wisdom-label {
+        font-weight: 500;
+        margin-right: 0.75rem;
+        color: #555;
+    }
+    
+    .wisdom-bar {
+        flex-grow: 1;
+        height: 8px;
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .wisdom-progress {
+        height: 100%;
+        background: linear-gradient(to right, #4CAF50, #8BC34A);
+        border-radius: 4px;
+        width: 75%; /* À ajuster dynamiquement */
+    }
+    
+    .wisdom-level {
+        margin-left: 0.75rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .avatar-container {
+            background-color: rgba(0, 188, 212, 0.2);
+            border-color: #333;
+        }
+        
+        .username {
+            color: #e0e0e0;
+        }
+        
+        .member-since {
+            color: #bbb;
+        }
+        
+        .profile-stat {
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+        
+        .profile-stat-text {
+            color: #e0e0e0;
+        }
+        
+        .conversation-item::before {
+            background-color: var(--primary-color);
+        }
+        
+        .conversation-item .conversation-title {
+            color: #e0e0e0;
+        }
+        
+        .conversation-item .conversation-subject {
+            color: #bbb;
+        }
+        
+        .agrobot-quote {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .agrobot-quote p {
+            color: #e0e0e0;
+        }
+        
+        .agrobot-suggestion {
+            border-top-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .agrobot-suggestion-item {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .agrobot-suggestion-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .wisdom-bar {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .wisdom-label {
+            color: #ccc;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 profile-section">
+        <div class="card profile-card h-100">
+            <div class="card-header text-white">
+                <h3><i class="bi bi-person-circle"></i> Profil</h3>
+            </div>
+            <div class="card-body text-center">
+                <div class="avatar-container">
+                    <i class="bi bi-person-badge avatar"></i>
+                </div>
+                <h4 class="username">{{ user.username }}</h4>
+                <p class="member-since">Membre depuis {{ user.date_joined|date:"d/m/Y" }}</p>
+                
+                <div class="profile-stat">
+                    <i class="bi bi-chat-dots"></i>
+                    <span class="profile-stat-text">{{ user.conversation_set.all|length }} conversations avec AgroBot</span>
+                </div>
+                
+                <div class="farming-wisdom-meter">
+                    <span class="wisdom-label">Sagesse agricole</span>
+                    <div class="wisdom-bar">
+                        <div class="wisdom-progress"></div>
+                    </div>
+                    <span class="wisdom-level">Niveau 3</span>
+                </div>
+                
+                <div class="agrobot-quote">
+                    <p>"La meilleure période pour planter un arbre était il y a 20 ans. La deuxième meilleure période est maintenant."</p>
+                    <div class="agrobot-quote-author">AgroBot</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-8 profile-section">
+        <div class="card conversations-card h-100">
+            <div class="card-header text-white">
+                <h3><i class="bi bi-chat-square-text"></i> Vos dernières conversations</h3>
+            </div>
+            <div class="card-body">
+                {% with conversations=user.conversation_set.all|slice:":5" %}
+                    {% if conversations %}
+                    <div class="conversations-list">
+                        {% for conv in conversations %}
+                        <a href="{% url 'chatbot:interface' %}?conversation={{ conv.id }}" 
+                           class="list-group-item list-group-item-action conversation-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h5 class="mb-1 conversation-title">
+                                    <i class="bi bi-chat-left-text me-2"></i>
+                                    Conversation #{{ conv.id }}
+                                </h5>
+                                <small class="conversation-time">{{ conv.date_derniere_activite|timesince }}</small>
+                            </div>
+                            <p class="mb-1 conversation-subject">{{ conv.sujet|default:"Sujet non spécifié" }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="agrobot-suggestion">
+                        <h5><i class="bi bi-lightbulb"></i> AgroBot vous recommande</h5>
+                        <a href="{% url 'agriculture:conseils' %}" class="agrobot-suggestion-item">
+                            <i class="bi bi-flower1"></i>
+                            <span>Découvrez nos conseils sur la rotation des cultures</span>
+                        </a>
+                        <a href="{% url 'chatbot:interface' %}" class="agrobot-suggestion-item">
+                            <i class="bi bi-droplet"></i>
+                            <span>Apprenez à optimiser votre irrigation</span>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info d-flex align-items-center gap-3">
+                        <div class="robot-avatar-container">
+                            <i class="bi bi-robot fs-1 robot-avatar"></i>
+                            <div class="robot-thinking">
+                                <i class="bi bi-question"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Vous n'avez pas encore de conversation</h5>
+                            <p class="mb-0">AgroBot est impatient de discuter avec vous et répondre à vos questions agricoles !</p>
+                        </div>
+                    </div>
+                    
+                    <div class="agrobot-quote">
+                        <p>"En agriculture, chaque question est une graine de connaissance qui peut donner une récolte abondante."</p>
+                        <div class="agrobot-quote-author">AgroBot</div>
+                    </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="text-center">
+                    <a href="{% url 'chatbot:interface' %}" class="btn chatbot-btn">
+                        <i class="bi bi-robot"></i> Parler à AgroBot
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation pour l'avatar robot
+        const robotAvatar = document.querySelector('.robot-avatar');
+        if (robotAvatar) {
+            setInterval(() => {
+                robotAvatar.classList.toggle('bi-robot');
+                robotAvatar.classList.toggle('bi-robot-fill');
+            }, 2000);
+        }
+        
+        // Citations agricoles aléatoires
+        const quotes = [
+            { text: "La meilleure période pour planter un arbre était il y a 20 ans. La deuxième meilleure période est maintenant.", author: "AgroBot" },
+            { text: "En agriculture, on ne joue pas contre la nature, on joue avec elle.", author: "AgroBot" },
+            { text: "L'agriculture durable n'est pas seulement une pratique, c'est une philosophie de vie.", author: "AgroBot" },
+            { text: "Un sol en bonne santé est la fondation d'une agriculture prospère.", author: "AgroBot" },
+            { text: "Observer, comprendre, puis agir : voilà la recette d'une agriculture réussie.", author: "AgroBot" }
+        ];
+        
+        const quoteElements = document.querySelectorAll('.agrobot-quote');
+        quoteElements.forEach(quoteElement => {
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            const quoteText = quoteElement.querySelector('p');
+            const quoteAuthor = quoteElement.querySelector('.agrobot-quote-author');
+            
+            if (quoteText && quoteAuthor) {
+                quoteText.textContent = `"${randomQuote.text}"`;
+                quoteAuthor.textContent = randomQuote.author;
+            }
+        });
+        
+        // Simulation de la progression de la sagesse agricole
+        const wisdomBar = document.querySelector('.wisdom-progress');
+        if (wisdomBar) {
+            // Calculer un pourcentage basé sur l'ancienneté du compte et le nombre de conversations
+            const memberSince = "{{ user.date_joined|date:'U' }}";
+            const conversationCount = {{ user.conversation_set.all|length }};
+            
+            const now = Math.floor(Date.now() / 1000);
+            const daysSinceMembership = (now - memberSince) / (60 * 60 * 24);
+            
+            // Formule simplifiée pour le pourcentage de sagesse
+            let wisdomPercentage = Math.min(100, (daysSinceMembership * 0.5) + (conversationCount * 5));
+            wisdomBar.style.width = `${wisdomPercentage}%`;
+            
+            // Déterminer le niveau de sagesse
+            const wisdomLevel = document.querySelector('.wisdom-level');
+            const level = Math.floor(wisdomPercentage / 20) + 1;
+            wisdomLevel.textContent = `Niveau ${level}`;
+        }
+    });
+</script>
+{% endblock %}

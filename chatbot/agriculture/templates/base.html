@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Agrosmart - Plateforme Agricole Intelligente{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-dark: #1b5e20;
+            --primary-light: #4caf50;
+            --accent-color: #ff8f00;
+            --light-bg: #f8f9fa;
+            --dark-text: #212121;
+            --light-text: #f5f5f5;
+            --gray-light: #e0e0e0;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .navbar-brand .brand-icon {
+            font-size: 1.8rem;
+        }
+        
+        .nav-link {
+            position: relative;
+            font-weight: 500;
+            padding: 0.8rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 0.25rem;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-success {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-success:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .btn-outline-light:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        main {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 0.5rem;
+        }
+        
+        .dropdown-item {
+            padding: 0.7rem 1.2rem;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--primary-dark), #1a472a);
+            padding: 2rem 0;
+            margin-top: auto;
+        }
+        
+        /* Icône du chatbot avec cercle autour */
+        .chatbot-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            width: 2rem;
+            height: 2rem;
+            margin-right: 0.5rem;
+        }
+        
+        /* Pour le bouton utilisateur */
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
+            
+            .dropdown-menu {
+                position: absolute;
+                right: 0;
+                left: auto;
+            }
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <span class="brand-icon"><i class="bi bi-robot"></i><i class="bi bi-tree-fill"></i></span> Agrosmart
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'agriculture:conseils' %}">
+                            <i class="bi bi-journal-bookmark-fill"></i> Conseils
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'chatbot:interface' %}">
+                            <span class="chatbot-icon"><i class="bi bi-robot"></i></span> AgroBot
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle user-btn" type="button" id="userMenu" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                <i class="bi bi-person"></i> Profil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Déconnexion
+                            </a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light me-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Connexion
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-success">
+                        <i class="bi bi-person-plus"></i> Inscription
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="text-white py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                        <span class="fs-4 me-2"><i class="bi bi-robot"></i><i class="bi bi-tree-fill"></i></span>
+                        <h4 class="mb-0">Agrosmart</h4>
+                    </div>
+                    <p class="mt-2 mb-0">Votre assistant agricole intelligent</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                    <p class="mb-0">
+                        &copy; {% now "Y" %} Agrosmart - Tous droits réservés
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

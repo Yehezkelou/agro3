@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AgroBot - Agrosmart{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'chatbot/css/chatbot.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3>Vos conversations</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for conv in conversations %}
+                        <a href="#" class="list-group-item list-group-item-action conversation-item" data-id="{{ conv.id }}">
+                            Conversation #{{ conv.id }}
+                            <small class="d-block text-muted">{{ conv.date_derniere_activite|date:"d/m/Y H:i" }}</small>
+                        </a>
+                        {% empty %}
+                        <div class="list-group-item">Aucune conversation</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="new-conversation" class="btn btn-success btn-sm">Nouvelle conversation</button>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header bg-success text-white">
+                    <h3>Ressources</h3>
+                </div>
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        {% for culture in cultures %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'agriculture:detail_culture' culture.id %}">{{ culture.nom }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h3 id="conversation-title">Nouvelle conversation</h3>
+                </div>
+                <div class="card-body chat-container" id="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="alert alert-info text-center">
+                            Bienvenue sur AgroBot. Commencez une nouvelle conversation ou sélectionnez une conversation existante.
+                        </div>
+                    </div>
+                    <div class="chat-input mt-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="user-input" placeholder="Posez votre question...">
+                            <button class="btn btn-primary" id="send-button">Envoyer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'chatbot/js/chatbot.js' %}"></script>
+{% endblock %}

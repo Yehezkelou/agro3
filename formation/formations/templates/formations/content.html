@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ formation.title }} - {% trans "Contenu" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://vjs.zencdn.net/8.6.1/video-js.css">
+<script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- En-tête du cours -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{{ formation.get_absolute_url }}" class="text-blue-600 hover:underline mr-4">
+                        <i class="fas fa-arrow-left mr-2"></i>{% trans "Retour à la formation" %}
+                    </a>
+                    <h1 class="text-xl font-semibold">{{ formation.title }}</h1>
+                </div>
+                
+                <!-- Barre de progression -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 mr-2">{% trans "Progression:" %}</span>
+                        <div class="w-32 bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                                 style="width: {{ enrollment.progress_percentage }}%"></div>
+                        </div>
+                        <span class="text-sm font-medium ml-2">{{ enrollment.progress_percentage }}%</span>
+                    </div>
+                    
+                    {% if enrollment.completed %}
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-check mr-1"></i>{% trans "Terminé" %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Contenu principal -->
+            <div class="lg:col-span-3">
+                <!-- Vidéo de la formation -->
+                {% if formation.video_url %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                    <div class="aspect-video">
+                        <video
+                            id="formation-video"
+                            class="video-js vjs-default-skin w-full h-full"
+                            controls
+                            preload="auto"
+                            data-setup='{}'>
+                            <source src="{{ formation.video_url }}" type="video/mp4">
+                            <p class="vjs-no-js">
+                                {% trans "Pour voir cette vidéo, veuillez activer JavaScript et considérer la mise à niveau vers un" %}
+                                <a href="https://videojs.com/html5-video-support/" target="_blank">
+                                    {% trans "navigateur qui supporte la vidéo HTML5" %}
+                                </a>
+                            </p>
+                        </video>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Contenu textuel -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-2xl font-bold mb-4">{% trans "Contenu de la formation" %}</h2>
+                    
+                    <!-- Description complète -->
+                    <div class="prose max-w-none mb-6">
+                        {{ formation.description|linebreaks }}
+                    </div>
+
+                    <!-- Objectifs d'apprentissage -->
+                    {% if formation.learning_objectives %}
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3">{% trans "Objectifs d'apprentissage" %}</h3>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            {{ formation.learning_objectives|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Prérequis -->
+                    {% if formation.prerequisites %}
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3">{% trans "Prérequis" %}</h3>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            {{ formation.prerequisites|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Documents PDF -->
+                {% if formation.pdf_content %}
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">
+                        <i class="fas fa-file-pdf text-red-500 mr-2"></i>{% trans "Documents de cours" %}
+                    </h3>
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-pdf text-red-500 text-2xl mr-3"></i>
+                            <div>
+                                <p class="font-medium">{% trans "Support de cours PDF" %}</p>
+                                <p class="text-sm text-gray-600">{% trans "Document complet de la formation" %}</p>
+                            </div>
+                        </div>
+                        <a href="{{ formation.pdf_content.url }}" 
+                           target="_blank"
+                           class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            <i class="fas fa-download mr-2"></i>{% trans "Télécharger" %}
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Zone d'interaction -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">{% trans "Votre progression" %}</h3>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        <button onclick="updateProgress(25)" 
+                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            {% trans "Marquer 25% terminé" %}
+                        </button>
+                        <button onclick="updateProgress(50)" 
+                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            {% trans "Marquer 50% terminé" %}
+                        </button>
+                        <button onclick="updateProgress(75)" 
+                                class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            {% trans "Marquer 75% terminé" %}
+                        </button>
+                        <button onclick="updateProgress(100)" 
+                                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                            {% trans "Marquer comme terminé" %}
+                        </button>
+                    </div>
+
+                    <!-- Progression personnalisée -->
+                    <div class="flex items-center space-x-4">
+                        <label class="text-sm font-medium">{% trans "Progression personnalisée:" %}</label>
+                        <input type="range" 
+                               id="progress-slider" 
+                               min="0" 
+                               max="100" 
+                               value="{{ enrollment.progress_percentage }}"
+                               class="flex-1"
+                               onchange="updateProgress(this.value)">
+                        <span id="progress-value" class="text-sm font-medium">{{ enrollment.progress_percentage }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Informations sur la formation -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 class="font-semibold mb-4">{% trans "Informations" %}</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Durée:" %}</span>
+                            <span class="font-medium">{{ formation.duration }}h</span>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Niveau:" %}</span>
+                            <span class="font-medium">{{ formation.get_difficulty_display }}</span>
+                        </div>
+                        
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Catégorie:" %}</span>
+                            <span class="font-medium">{{ formation.category.name }}</span>
+                        </div>
+                        
+                        {% if enrollment.date_enrolled %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Inscrit le:" %}</span>
+                            <span class="font-medium">{{ enrollment.date_enrolled|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if enrollment.completion_date %}
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">{% trans "Terminé le:" %}</span>
+                            <span class="font-medium">{{ enrollment.completion_date|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Certificat -->
+                {% if enrollment.completed %}
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 class="font-semibold mb-4">
+                        <i class="fas fa-certificate text-yellow-500 mr-2"></i>{% trans "Certificat" %}
+                    </h3>
+                    
+                    {% if enrollment.certificate_issued %}
+                    <div class="text-center">
+                        <i class="fas fa-award text-yellow-500 text-4xl mb-3"></i>
+                        <p class="text-sm text-gray-600 mb-4">{% trans "Félicitations ! Votre certificat est disponible." %}</p>
+                        <a href="{{ enrollment.certificate_url }}" 
+                           target="_blank"
+                           class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 w-full inline-block text-center">
+                            <i class="fas fa-download mr-2"></i>{% trans "Télécharger le certificat" %}
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center">
+                        <i class="fas fa-clock text-gray-400 text-4xl mb-3"></i>
+                        <p class="text-sm text-gray-600">{% trans "Votre certificat est en cours de génération." %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Support/Aide -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="font-semibold mb-4">
+                        <i class="fas fa-question-circle text-blue-500 mr-2"></i>{% trans "Besoin d'aide ?" %}
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <a href="#" class="block text-blue-600 hover:underline text-sm">
+                            <i class="fas fa-book mr-2"></i>{% trans "Guide d'utilisation" %}
+                        </a>
+                        <a href="#" class="block text-blue-600 hover:underline text-sm">
+                            <i class="fas fa-envelope mr-2"></i>{% trans "Contacter le support" %}
+                        </a>
+                        <a href="#" class="block text-blue-600 hover:underline text-sm">
+                            <i class="fas fa-comments mr-2"></i>{% trans "FAQ" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mise à jour de la progression
+function updateProgress(percentage) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(`{% url 'formations:update_progress' formation.slug %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `progress=${percentage}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mettre à jour l'affichage
+            document.querySelector('#progress-value').textContent = data.progress + '%';
+            document.querySelector('#progress-slider').value = data.progress;
+            
+            // Mettre à jour la barre de progression
+            const progressBar = document.querySelector('.bg-green-500');
+            progressBar.style.width = data.progress + '%';
+            
+            if (data.completed) {
+                location.reload(); // Recharger pour afficher le certificat
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('{% trans "Erreur lors de la mise à jour de la progression" %}');
+    });
+}
+
+// CSRF Token
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter le token CSRF s'il n'existe pas
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        document.body.appendChild(csrfInput);
+    }
+    
+    // Initialiser le lecteur vidéo
+    if (document.getElementById('formation-video')) {
+        videojs('formation-video', {
+            responsive: true,
+            fluid: true
+        });
+    }
+});
+</script>
+{% endblock %}

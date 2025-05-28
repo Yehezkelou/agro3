@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription | Agrosmart{% endblock %}
+{% load widget_tweaks %}
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page d'inscription */
+    .auth-container {
+        max-width: 500px;
+        margin: 2rem auto;
+    }
+    
+    .auth-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        background-color: white;
+    }
+    
+    .auth-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 1.75rem 2rem;
+        position: relative;
+    }
+    
+    .auth-header h3 {
+        color: white;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+    }
+    
+    .auth-header i {
+        font-size: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.2);
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .auth-body {
+        padding: 2.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #444;
+    }
+    
+    .form-control, select.form-select {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #f8f8f8;
+        background-clip: padding-box;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, select.form-select:focus {
+        color: #495057;
+        background-color: #fff;
+        border-color: var(--primary-color);
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+    }
+    
+    .form-text {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .btn-auth {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-weight: 500;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        color: white;
+    }
+    
+    .btn-auth:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        background: linear-gradient(135deg, #43a047, #1b5e20);
+    }
+    
+    .btn-auth i {
+        font-size: 1.25rem;
+    }
+    
+    .auth-footer {
+        padding: 1.5rem 2rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+    
+    .auth-footer p {
+        font-size: 1rem;
+        color: #666;
+    }
+    
+    .auth-footer a {
+        color: var(--primary-color);
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .auth-footer a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+    
+    .auth-decorations {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        z-index: -1;
+    }
+    
+    .auth-decoration {
+        position: absolute;
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.5), rgba(46, 125, 50, 0.3));
+        border-radius: 50%;
+    }
+    
+    .auth-decoration-1 {
+        width: 300px;
+        height: 300px;
+        top: -150px;
+        right: -150px;
+        opacity: 0.3;
+    }
+    
+    .auth-decoration-2 {
+        width: 250px;
+        height: 250px;
+        bottom: -100px;
+        left: -100px;
+        opacity: 0.2;
+    }
+    
+    /* Pour adapter les champs Django au style */
+    input.form-control[type="text"],
+    input.form-control[type="email"],
+    input.form-control[type="password"] {
+        padding: 0.75rem 1rem;
+        background-color: #f8f8f8;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        width: 100%;
+    }
+    
+    ul.errorlist {
+        color: #dc3545;
+        padding-left: 0;
+        list-style: none;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Effet de découpage sur les décorations */
+    .auth-decoration::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.2);
+        transform: rotate(45deg);
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .auth-card {
+            background-color: #2d2d2d;
+        }
+        
+        .form-group label {
+            color: #e0e0e0;
+        }
+        
+        .form-control, select.form-select {
+            background-color: #333;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+        
+        .form-control:focus, select.form-select:focus {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+        }
+        
+        .form-text {
+            color: #aaa;
+        }
+        
+        .auth-footer {
+            background-color: #252525;
+            border-top-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .auth-footer p {
+            color: #ccc;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-decorations">
+    <div class="auth-decoration auth-decoration-1"></div>
+    <div class="auth-decoration auth-decoration-2"></div>
+</div>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h3><i class="bi bi-person-plus"></i> Créer un compte</h3>
+        </div>
+        <div class="auth-body">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    
+                    {% if field.errors %}
+                        {{ field|add_class:"form-control is-invalid" }}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                            <li><i class="bi bi-exclamation-circle"></i> {{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ field|add_class:"form-control" }}
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                    <small class="form-text">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn btn-auth w-100">
+                    <i class="bi bi-check-circle"></i> S'inscrire
+                </button>
+            </form>
+        </div>
+        <div class="auth-footer">
+            <p class="mb-0">Déjà un compte? 
+                <a href="{% url 'accounts:login' %}">Connectez-vous</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

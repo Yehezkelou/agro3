@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block content %}
+<h1>Profil de {{ user.username }}</h1>
+<p>Type d'utilisateur: {{ user.get_user_type_display }}</p>
+<p>Email: {{ user.email }}</p>
+<p>Téléphone: {{ user.phone }}</p>
+<p>Localisation: {{ user.location }}</p>
+<a href="{% url 'profile_update' %}">Modifier le profil</a>
+{% endblock %}

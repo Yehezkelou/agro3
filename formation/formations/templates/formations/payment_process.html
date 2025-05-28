@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Paiement" %} - {{ enrollment.formation.title }}{% endblock %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <!-- En-tête -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">{% trans "Finaliser votre inscription" %}</h1>
+            <p class="text-gray-600">{% trans "Complétez votre paiement pour accéder à la formation" %}</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Formulaire de paiement -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-6">
+                        <i class="fas fa-credit-card text-blue-500 mr-2"></i>{% trans "Méthodes de paiement" %}
+                    </h2>
+
+                    <form id="payment-form" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Sélection de la méthode de paiement -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                {% trans "Choisissez votre méthode de paiement" %}
+                            </label>
+                            
+                            <div class="space-y-3">
+                                <!-- Orange Money -->
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer payment-method" 
+                                     data-method="orange_money">
+                                    <div class="flex items-center">
+                                        <input type="radio" name="payment_method" value="orange_money" 
+                                               id="orange_money" class="mr-3">
+                                        <label for="orange_money" class="flex items-center cursor-pointer flex-1">
+                                            <img src="{% static 'images/orange-money.png' %}" 
+                                                 alt="Orange Money" class="w-8 h-8 mr-3">
+                                            <div>
+                                                <span class="font-medium">Orange Money</span>
+                                                <p class="text-sm text-gray-600">{% trans "Paiement via Orange Money" %}</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- MTN Mobile Money -->
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer payment-method" 
+                                     data-method="mtn_momo">
+                                    <div class="flex items-center">
+                                        <input type="radio" name="payment_method" value="mtn_momo" 
+                                               id="mtn_momo" class="mr-3">
+                                        <label for="mtn_momo" class="flex items-center cursor-pointer flex-1">
+                                            <img src="{% static 'images/mtn-momo.png' %}" 
+                                                 alt="MTN Mobile Money" class="w-8 h-8 mr-3">
+                                            <div>
+                                                <span class="font-medium">MTN Mobile Money</span>
+                                                <p class="text-sm text-gray-600">{% trans "Paiement via MTN Mobile Money" %}</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Moov Money -->
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer payment-method" 
+                                     data-method="moov_money">
+                                    <div class="flex items-center">
+                                        <input type="radio" name="payment_method" value="moov_money" 
+                                               id="moov_money" class="mr-3">
+                                        <label for="moov_money" class="flex items-center cursor-pointer flex-1">
+                                            <img src="{% static 'images/moov-money.png' %}" 
+                                                 alt="Moov Money" class="w-8 h-8 mr-3">
+                                            <div>
+                                                <span class="font-medium">Moov Money</span>
+                                                <p class="text-sm text-gray-600">{% trans "Paiement via Moov Money" %}</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Virement bancaire -->
+                                <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer payment-method" 
+                                     data-method="bank_transfer">
+                                    <div class="flex items-center">
+                                        <input type="radio" name="payment_method" value="bank_transfer" 
+                                               id="bank_transfer" class="mr-3">
+                                        <label for="bank_transfer" class="flex items-center cursor-pointer flex-1">
+                                            <i class="fas fa-university text-blue-500 text-2xl mr-3"></i>
+                                            <div>
+                                                <span class="font-medium">{% trans "Virement bancaire" %}</span>
+                                                <p class="text-sm text-gray-600">{% trans "Paiement par virement bancaire" %}</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Détails de paiement pour Mobile Money -->
+                        <div id="mobile-money-details" class="hidden mb-6">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h3 class="font-medium mb-3">{% trans "Informations de paiement" %}</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            {% trans "Numéro de téléphone" %}
+                                        </label>
+                                        <input type="tel" name="phone_number" 
+                                               class="w-full border rounded-lg px-3 py-2"
+                                               placeholder="07 XX XX XX XX"
+                                               required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            {% trans "Nom du titulaire" %}
+                                        </label>
+                                        <input type="text" name="account_holder" 
+                                               class="w-full border rounded-lg px-3 py-2"
+                                               placeholder="{% trans 'Nom complet' %}"
+                                               required>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-3">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    {% trans "Vous recevrez un SMS pour confirmer le paiement" %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Détails virement bancaire -->
+                        <div id="bank-transfer-details" class="hidden mb-6">
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <h3 class="font-medium mb-3">
+                                    <i class="fas fa-university text-yellow-600 mr-2"></i>
+                                    {% trans "Informations bancaires" %}
+                                </h3>
+                                <div class="space-y-2 text-sm">
+                                    <div><strong>{% trans "Bénéficiaire" %}:</strong> {{ company_name }}</div>
+                                    <div><strong>{% trans "Banque" %}:</strong> {{ bank_name }}</div>
+                                    <div><strong>{% trans "IBAN" %}:</strong> {{ bank_iban }}</div>
+                                    <div><strong>{% trans "Code SWIFT" %}:</strong> {{ bank_swift }}</div>
+                                </div>
+                                <div class="mt-4 p-3 bg-white rounded border-l-4 border-yellow-400">
+                                    <p class="text-sm text-gray-700">
+                                        <strong>{% trans "Important" %}:</strong> 
+                                        {% trans "Mentionnez votre numéro de référence" %} <code>{{ enrollment.reference }}</code> {% trans "lors du virement" %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Code de réduction -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-sm font-medium text-gray-700">
+                                    {% trans "Code de réduction" %} ({% trans "optionnel" %})
+                                </label>
+                                <button type="button" id="toggle-coupon" class="text-blue-500 text-sm hover:underline">
+                                    {% trans "Ajouter un code" %}
+                                </button>
+                            </div>
+                            <div id="coupon-input" class="hidden">
+                                <div class="flex gap-2">
+                                    <input type="text" name="coupon_code" 
+                                           class="flex-1 border rounded-lg px-3 py-2"
+                                           placeholder="{% trans 'Entrez votre code' %}">
+                                    <button type="button" id="apply-coupon" 
+                                            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                                        {% trans "Appliquer" %}
+                                    </button>
+                                </div>
+                                <div id="coupon-message" class="mt-2 text-sm hidden"></div>
+                            </div>
+                        </div>
+
+                        <!-- Conditions générales -->
+                        <div class="mb-6">
+                            <label class="flex items-start">
+                                <input type="checkbox" name="accept_terms" required 
+                                       class="mt-1 mr-3">
+                                <span class="text-sm text-gray-700">
+                                    {% trans "J'accepte les" %} 
+                                    <a href="{% url 'terms' %}" target="_blank" class="text-blue-500 hover:underline">
+                                        {% trans "conditions générales" %}
+                                    </a> 
+                                    {% trans "et la" %} 
+                                    <a href="{% url 'privacy' %}" target="_blank" class="text-blue-500 hover:underline">
+                                        {% trans "politique de confidentialité" %}
+                                    </a>
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Bouton de paiement -->
+                        <button type="submit" id="pay-button" 
+                                class="w-full bg-green-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-600 transition-colors disabled:bg-gray-400"
+                                disabled>
+                            <i class="fas fa-lock mr-2"></i>
+                            {% trans "Procéder au paiement" %} - {{ enrollment.price|floatformat:0 }} FCFA
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Résumé de la commande -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
+                    <h3 class="text-lg font-semibold mb-4">{% trans "Résumé de votre commande" %}</h3>
+                    
+                    <!-- Formation -->
+                    <div class="mb-4">
+                        <div class="flex items-start space-x-3">
+                            {% if enrollment.formation.image %}
+                                <img src="{{ enrollment.formation.image.url }}" 
+                                     alt="{{ enrollment.formation.title }}"
+                                     class="w-16 h-16 object-cover rounded">
+                            {% endif %}
+                            <div class="flex-1">
+                                <h4 class="font-medium text-sm">{{ enrollment.formation.title }}</h4>
+                                <p class="text-xs text-gray-600 mt-1">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    {{ enrollment.formation.duration }} {% trans "heures" %}
+                                </p>
+                                <p class="text-xs text-gray-600">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    {% trans "Début" %}: {{ enrollment.formation.start_date|date:"d/m/Y" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Détails prix -->
+                    <div class="border-t pt-4 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span>{% trans "Prix de la formation" %}</span>
+                            <span>{{ enrollment.original_price|floatformat:0 }} FCFA</span>
+                        </div>
+                        {% if enrollment.discount_amount > 0 %}
+                        <div class="flex justify-between text-sm text-green-600">
+                            <span>{% trans "Réduction" %}</span>
+                            <span>-{{ enrollment.discount_amount|floatformat:0 }} FCFA</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex justify-between text-sm">
+                            <span>{% trans "Frais de traitement" %}</span>
+                            <span>{{ enrollment.processing_fee|floatformat:0 }} FCFA</span>
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="border-t pt-4 mt-4">
+                        <div class="flex justify-between text-lg font-semibold">
+                            <span>{% trans "Total à payer" %}</span>
+                            <span class="text-green-600">{{ enrollment.price|floatformat:0 }} FCFA</span>
+                        </div>
+                    </div>
+
+                    <!-- Informations supplémentaires -->
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-medium text-sm mb-2">
+                            <i class="fas fa-shield-alt text-blue-500 mr-2"></i>
+                            {% trans "Paiement sécurisé" %}
+                        </h4>
+                        <p class="text-xs text-gray-600">
+                            {% trans "Vos informations de paiement sont protégées et cryptées" %}
+                        </p>
+                    </div>
+
+                    <!-- Contact support -->
+                    <div class="mt-4 text-center">
+                        <p class="text-xs text-gray-600">
+                            {% trans "Besoin d'aide ?" %}
+                            <a href="{% url 'contact' %}" class="text-blue-500 hover:underline">
+                                {% trans "Contactez-nous" %}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Messages d'alerte -->
+<div id="alert-container" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('.payment-method');
+    const mobileMoneyDetails = document.getElementById('mobile-money-details');
+    const bankTransferDetails = document.getElementById('bank-transfer-details');
+    const payButton = document.getElementById('pay-button');
+    const toggleCoupon = document.getElementById('toggle-coupon');
+    const couponInput = document.getElementById('coupon-input');
+    const applyCoupon = document.getElementById('apply-coupon');
+    const acceptTerms = document.querySelector('input[name="accept_terms"]');
+
+    // Gestion des méthodes de paiement
+    paymentMethods.forEach(method => {
+        method.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            const methodType = this.dataset.method;
+            
+            // Cocher le radio button
+            radio.checked = true;
+            
+            // Masquer tous les détails
+            mobileMoneyDetails.classList.add('hidden');
+            bankTransferDetails.classList.add('hidden');
+            
+            // Afficher les détails appropriés
+            if (['orange_money', 'mtn_momo', 'moov_money'].includes(methodType)) {
+                mobileMoneyDetails.classList.remove('hidden');
+            } else if (methodType === 'bank_transfer') {
+                bankTransferDetails.classList.remove('hidden');
+            }
+            
+            checkFormValidity();
+        });
+    });
+
+    // Gestion du code de réduction
+    toggleCoupon.addEventListener('click', function() {
+        couponInput.classList.toggle('hidden');
+        this.textContent = couponInput.classList.contains('hidden') ? 
+            '{% trans "Ajouter un code" %}' : '{% trans "Masquer" %}';
+    });
+
+    applyCoupon.addEventListener('click', function() {
+        const couponCode = document.querySelector('input[name="coupon_code"]').value;
+        const messageDiv = document.getElementById('coupon-message');
+        
+        if (!couponCode.trim()) {
+            showMessage(messageDiv, '{% trans "Veuillez entrer un code de réduction" %}', 'error');
+            return;
+        }
+
+        // Simulation d'application du coupon (à remplacer par un appel AJAX)
+        this.disabled = true;
+        this.textContent = '{% trans "Vérification..." %}';
+        
+        setTimeout(() => {
+            // Simuler une réponse
+            if (couponCode.toLowerCase() === 'test10') {
+                showMessage(messageDiv, '{% trans "Code appliqué ! 10% de réduction" %}', 'success');
+            } else {
+                showMessage(messageDiv, '{% trans "Code invalide ou expiré" %}', 'error');
+            }
+            
+            this.disabled = false;
+            this.textContent = '{% trans "Appliquer" %}';
+        }, 1500);
+    });
+
+    // Vérification de la validité du formulaire
+    function checkFormValidity() {
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        const termsAccepted = acceptTerms.checked;
+        
+        payButton.disabled = !(paymentMethod && termsAccepted);
+    }
+
+    // Event listeners pour la validation
+    acceptTerms.addEventListener('change', checkFormValidity);
+
+    // Gestion de la soumission du formulaire
+    document.getElementById('payment-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        
+        if (!paymentMethod) {
+            showAlert('{% trans "Veuillez sélectionner une méthode de paiement" %}', 'error');
+            return;
+        }
+
+        // Désactiver le bouton pour éviter les doubles soumissions
+        payButton.disabled = true;
+        payButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{% trans "Traitement en cours..." %}';
+
+        // Simuler le traitement (remplacer par la vraie logique)
+        setTimeout(() => {
+            this.submit();
+        }, 1000);
+    });
+
+    // Fonction pour afficher les messages
+    function showMessage(element, message, type) {
+        element.className = `mt-2 text-sm ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+        element.textContent = message;
+        element.classList.remove('hidden');
+    }
+
+    // Fonction pour afficher les alertes
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        const alert = document.createElement('div');
+        alert.className = `alert p-4 rounded-lg mb-2 ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+        alert.innerHTML = `
+            <div class="flex items-center justify-between">
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-lg">×</button>
+            </div>
+        `;
+        alertContainer.appendChild(alert);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentElement) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

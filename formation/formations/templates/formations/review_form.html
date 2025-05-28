@@ -1,0 +1,236 @@
+<!-- Formulaire d'avis -->
+<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-screen overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">{% trans "Laisser un avis" %}</h3>
+                    <button onclick="closeReviewModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="reviewForm" method="post" action="{% url 'formations:submit_review' slug=formation.slug %}">
+                    {% csrf_token %}
+                    
+                    <!-- Formation info -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <div class="flex items-center space-x-3">
+                            {% if formation.thumbnail %}
+                            <img src="{{ formation.thumbnail.url }}" alt="{{ formation.title }}" class="w-12 h-12 object-cover rounded">
+                            {% else %}
+                            <div class="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                                <i class="fas fa-graduation-cap text-gray-400"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h4 class="font-medium text-gray-900">{{ formation.title }}</h4>
+                                <p class="text-sm text-gray-600">{{ formation.category.name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Note -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            {% trans "Note" %} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="flex items-center space-x-1">
+                            <div class="star-rating">
+                                <input type="radio" name="rating" value="5" id="star5" required>
+                                <label for="star5" class="star">★</label>
+                                <input type="radio" name="rating" value="4" id="star4">
+                                <label for="star4" class="star">★</label>
+                                <input type="radio" name="rating" value="3" id="star3">
+                                <label for="star3" class="star">★</label>
+                                <input type="radio" name="rating" value="2" id="star2">
+                                <label for="star2" class="star">★</label>
+                                <input type="radio" name="rating" value="1" id="star1">
+                                <label for="star1" class="star">★</label>
+                            </div>
+                            <span id="ratingText" class="text-sm text-gray-500 ml-2"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Titre de l'avis -->
+                    <div class="mb-4">
+                        <label for="reviewTitle" class="block text-sm font-medium text-gray-700 mb-2">
+                            {% trans "Titre de votre avis" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="reviewTitle" 
+                               name="title" 
+                               maxlength="200" 
+                               required
+                               placeholder="{% trans 'Résumez votre expérience en quelques mots' %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="text-xs text-gray-500 mt-1">
+                            <span id="titleCounter">0</span>/200 {% trans "caractères" %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contenu de l'avis -->
+                    <div class="mb-4">
+                        <label for="reviewContent" class="block text-sm font-medium text-gray-700 mb-2">
+                            {% trans "Votre avis détaillé" %} <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="reviewContent" 
+                                  name="content" 
+                                  rows="4" 
+                                  required
+                                  placeholder="{% trans 'Partagez votre expérience : ce que vous avez aimé, ce qui pourrait être amélioré, etc.' %}"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"></textarea>
+                        <div class="text-xs text-gray-500 mt-1">
+                            {% trans "Minimum 50 caractères recommandés" %}
+                        </div>
+                    </div>
+                    
+                    <!-- Conseils -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-lightbulb text-blue-600 mt-0.5 text-sm"></i>
+                            <div>
+                                <p class="text-sm text-blue-800 font-medium mb-1">{% trans "Conseils pour un bon avis :" %}</p>
+                                <ul class="text-xs text-blue-700 space-y-1">
+                                    <li>• {% trans "Soyez honnête et constructif" %}</li>
+                                    <li>• {% trans "Mentionnez ce que vous avez appris" %}</li>
+                                    <li>• {% trans "Parlez de la qualité du contenu" %}</li>
+                                    <li>• {% trans "Indiquez si vous recommanderiez cette formation" %}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons -->
+                    <div class="flex space-x-3">
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {% trans "Publier l'avis" %}
+                        </button>
+                        <button type="button" onclick="closeReviewModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            {% trans "Annuler" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating .star {
+    font-size: 1.5rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.star-rating .star:hover,
+.star-rating .star:hover ~ .star,
+.star-rating input:checked ~ .star {
+    color: #fbbf24;
+}
+
+.star-rating input:checked ~ .star {
+    color: #f59e0b;
+}
+</style>
+
+<script>
+function openReviewModal() {
+    document.getElementById('reviewModal').classList.remove('hidden');
+}
+
+function closeReviewModal() {
+    document.getElementById('reviewModal').classList.add('hidden');
+    document.getElementById('reviewForm').reset();
+    updateRatingText();
+}
+
+// Gestion du compteur de caractères pour le titre
+document.getElementById('reviewTitle').addEventListener('input', function() {
+    const counter = document.getElementById('titleCounter');
+    counter.textContent = this.value.length;
+    
+    if (this.value.length > 180) {
+        counter.parentElement.classList.add('text-red-500');
+        counter.parentElement.classList.remove('text-gray-500');
+    } else {
+        counter.parentElement.classList.remove('text-red-500');
+        counter.parentElement.classList.add('text-gray-500');
+    }
+});
+
+// Gestion de la notation par étoiles
+const ratingInputs = document.querySelectorAll('input[name="rating"]');
+const ratingText = document.getElementById('ratingText');
+
+const ratingLabels = {
+    1: '{% trans "Très décevant" %}',
+    2: '{% trans "Décevant" %}',
+    3: '{% trans "Correct" %}',
+    4: '{% trans "Très bien" %}',
+    5: '{% trans "Excellent" %}'
+};
+
+function updateRatingText() {
+    const selectedRating = document.querySelector('input[name="rating"]:checked');
+    if (selectedRating) {
+        ratingText.textContent = ratingLabels[selectedRating.value];
+    } else {
+        ratingText.textContent = '';
+    }
+}
+
+ratingInputs.forEach(input => {
+    input.addEventListener('change', updateRatingText);
+});
+
+// Soumission du formulaire
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    const title = document.getElementById('reviewTitle').value.trim();
+    const content = document.getElementById('reviewContent').value.trim();
+    const rating = document.querySelector('input[name="rating"]:checked');
+    
+    if (!rating) {
+        e.preventDefault();
+        alert('{% trans "Veuillez sélectionner une note" %}');
+        return;
+    }
+    
+    if (title.length < 5) {
+        e.preventDefault();
+        alert('{% trans "Le titre doit contenir au moins 5 caractères" %}');
+        return;
+    }
+    
+    if (content.length < 20) {
+        e.preventDefault();
+        alert('{% trans "L\'avis doit contenir au moins 20 caractères" %}');
+        return;
+    }
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>{% trans "Publication..." %}';
+});
+
+// Validation en temps réel
+document.getElementById('reviewContent').addEventListener('input', function() {
+    if (this.value.length < 20) {
+        this.setCustomValidity('{% trans "Minimum 20 caractères requis" %}');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>

@@ -1,0 +1,296 @@
+<!-- formations/enrollment_confirmation.html -->
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Confirmation d'inscription" %} - {{ formation.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- En-tête -->
+            <div class="text-center mb-5">
+                {% if enrollment.payment_status == 'COMPLETED' %}
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h1 class="h2 text-success mb-3">
+                        {% trans "Inscription confirmée !" %}
+                    </h1>
+                    <p class="lead text-muted">
+                        {% trans "Félicitations ! Vous êtes maintenant inscrit à cette formation." %}
+                    </p>
+                {% else %}
+                    <div class="mb-4">
+                        <i class="fas fa-hourglass-half text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h1 class="h2 text-warning mb-3">
+                        {% trans "Inscription en attente" %}
+                    </h1>
+                    <p class="lead text-muted">
+                        {% trans "Votre inscription sera confirmée après le paiement." %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            <!-- Détails de la formation -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-graduation-cap"></i>
+                        {% trans "Détails de la formation" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if formation.thumbnail %}
+                                <img src="{{ formation.thumbnail.url }}" 
+                                     class="img-fluid rounded" 
+                                     alt="{{ formation.title }}">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="fas fa-graduation-cap fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h3>{{ formation.title }}</h3>
+                            <p class="text-muted">{{ formation.short_description }}</p>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>{% trans "Catégorie:" %}</strong><br>
+                                    {% if formation.category %}
+                                        <span class="badge bg-primary">{{ formation.category.name }}</span>
+                                    {% else %}
+                                        <span class="text-muted">{% trans "Non spécifiée" %}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-6">
+                                    <strong>{% trans "Niveau:" %}</strong><br>
+                                    <span class="badge bg-secondary">{{ formation.get_difficulty_display }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <strong>{% trans "Durée:" %}</strong><br>
+                                    <i class="fas fa-clock text-muted"></i> {{ formation.duration }} heures
+                                </div>
+                                <div class="col-6">
+                                    <strong>{% trans "Prix payé:" %}</strong><br>
+                                    {% if enrollment.amount_paid > 0 %}
+                                        <span class="h5 text-success">{{ enrollment.amount_paid }} CFA</span>
+                                    {% else %}
+                                        <span class="h5 text-success">{% trans "Gratuit" %}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Détails de l'inscription -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle"></i>
+                        {% trans "Détails de l'inscription" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{% trans "Date d'inscription:" %}</strong><br>
+                            {{ enrollment.date_enrolled|date:"d/m/Y à H:i" }}</p>
+                            
+                            <p><strong>{% trans "Statut du paiement:" %}</strong><br>
+                            {% if enrollment.payment_status == 'COMPLETED' %}
+                                <span class="badge bg-success">{% trans "Payé" %}</span>
+                            {% elif enrollment.payment_status == 'PENDING' %}
+                                <span class="badge bg-warning">{% trans "En attente" %}</span>
+                            {% elif enrollment.payment_status == 'FAILED' %}
+                                <span class="badge bg-danger">{% trans "Échoué" %}</span>
+                            {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {% if enrollment.payment_method %}
+                                <p><strong>{% trans "Méthode de paiement:" %}</strong><br>
+                                {{ enrollment.payment_method }}</p>
+                            {% endif %}
+                            
+                            {% if enrollment.transaction_id %}
+                                <p><strong>{% trans "ID de transaction:" %}</strong><br>
+                                <code>{{ enrollment.transaction_id }}</code></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if enrollment.payment_status == 'COMPLETED' %}
+                        <h5 class="text-success mb-3">
+                            <i class="fas fa-play-circle"></i>
+                            {% trans "Vous pouvez maintenant accéder au contenu !" %}
+                        </h5>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'formations:content' formation.slug %}" 
+                               class="btn btn-success btn-lg">
+                                <i class="fas fa-play"></i>
+                                {% trans "Commencer la formation" %}
+                            </a>
+                            
+                            <a href="{% url 'formations:my_formations' %}" 
+                               class="btn btn-outline-primary">
+                                <i class="fas fa-list"></i>
+                                {% trans "Mes formations" %}
+                            </a>
+                        </div>
+                        
+                    {% elif enrollment.payment_status == 'PENDING' and not formation.is_free %}
+                        <h5 class="text-warning mb-3">
+                            <i class="fas fa-credit-card"></i>
+                            {% trans "Paiement requis" %}
+                        </h5>
+                        
+                        <p class="text-muted mb-4">
+                            {% trans "Veuillez compléter votre paiement pour accéder au contenu de la formation." %}
+                        </p>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a href="{% url 'payments:process' enrollment_id=enrollment.id %}" 
+                               class="btn btn-warning btn-lg">
+                                <i class="fas fa-credit-card"></i>
+                                {% trans "Procéder au paiement" %}
+                            </a>
+                            
+                            <a href="{{ formation.get_absolute_url }}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                {% trans "Retour à la formation" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Prochaines étapes -->
+            <div class="mt-5">
+                <h4 class="mb-3">{% trans "Prochaines étapes recommandées" %}</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center p-3">
+                            <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                            <h5>{% trans "Rejoignez la communauté" %}</h5>
+                            <p class="text-muted">
+                                {% trans "Connectez-vous avec d'autres apprenants et partagez vos expériences." %}
+                            </p>
+                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                {% trans "Forum" %}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="text-center p-3">
+                            <i class="fas fa-bell fa-2x text-warning mb-3"></i>
+                            <h5>{% trans "Notifications" %}</h5>
+                            <p class="text-muted">
+                                {% trans "Activez les notifications pour ne manquer aucune mise à jour." %}
+                            </p>
+                            <a href="{% url 'accounts:settings' %}" class="btn btn-outline-warning btn-sm">
+                                {% trans "Paramètres" %}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="text-center p-3">
+                            <i class="fas fa-certificate fa-2x text-success mb-3"></i>
+                            <h5>{% trans "Certificat" %}</h5>
+                            <p class="text-muted">
+                                {% trans "Terminez la formation pour obtenir votre certificat de réussite." %}
+                            </p>
+                            <a href="#" class="btn btn-outline-success btn-sm">
+                                {% trans "En savoir plus" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Support -->
+            <div class="mt-5 text-center">
+                <p class="text-muted">
+                    {% trans "Des questions ? Notre équipe support est là pour vous aider." %}
+                </p>
+                <a href="{% url 'support:contact' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-question-circle"></i>
+                    {% trans "Contacter le support" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de partage (optionnel) -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">
+                    {% trans "Partager votre réussite" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>{% trans "Partagez votre inscription à cette formation avec vos amis !" %}</p>
+                <div class="d-grid gap-2">
+                    <a href="#" class="btn btn-primary">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </a>
+                    <a href="#" class="btn btn-info">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </a>
+                    <a href="#" class="btn btn-success">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée pour les cartes
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+    
+    // Confettis pour les inscriptions réussies (optionnel)
+    {% if enrollment.payment_status == 'COMPLETED' %}
+        // Ici vous pouvez ajouter une animation de confettis
+        console.log('Inscription réussie ! 🎉');
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+
+{% block title %}Nos Cultures | Agrosmart{% endblock %}
+
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page des cultures */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(46, 125, 50, 0.1);
+    }
+    
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        background-color: rgba(46, 125, 50, 0.1);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    
+    .btn-add-culture {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.6rem 1.4rem;
+        font-weight: 500;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-add-culture:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        background: linear-gradient(135deg, var(--primary-color), #1b4b1b);
+    }
+    
+    .btn-add-culture i {
+        font-size: 1.1rem;
+    }
+    
+    .culture-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    
+    .culture-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .culture-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .culture-image-container {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 60%; /* Ratio 5:3 */
+        overflow: hidden;
+        background-color: #f0f0f0;
+    }
+    
+    .culture-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: all 0.5s ease;
+    }
+    
+    .culture-card:hover .culture-image {
+        transform: scale(1.05);
+    }
+    
+    .culture-image-fallback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        color: #aaa;
+    }
+    
+    .culture-card .card-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .culture-card .card-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.75rem;
+    }
+    
+    .culture-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .bg-warning-gradient {
+        background: linear-gradient(135deg, #FFC107, #FF8F00);
+        color: #fff;
+    }
+    
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        color: #fff;
+    }
+    
+    .bg-info-gradient {
+        background: linear-gradient(135deg, #2196F3, #0D47A1);
+        color: #fff;
+    }
+    
+    .culture-card .card-text {
+        color: #555;
+        margin-top: 0.75rem;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+        line-height: 1.6;
+    }
+    
+    .culture-card .card-footer {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        background-color: rgba(0, 0, 0, 0.01);
+    }
+    
+    .btn-details {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-details i {
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-details:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-details:hover i {
+        transform: translateX(5px);
+    }
+    
+    .empty-alert {
+        background-color: rgba(33, 150, 243, 0.1);
+        border-left: 4px solid #2196F3;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .empty-alert i {
+        font-size: 2rem;
+        color: #2196F3;
+    }
+    
+    /* Modal styles */
+    .modal-content {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-bottom: none;
+        padding: 1.5rem;
+    }
+    
+    .modal-header .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .modal-header .btn-close {
+        color: white;
+        opacity: 0.8;
+        transition: all 0.2s ease;
+    }
+    
+    .modal-header .btn-close:hover {
+        opacity: 1;
+        transform: rotate(90deg);
+    }
+    
+    .modal-body {
+        padding: 2rem;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.25rem 2rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+        background-color: #f9f9f9;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+        border-color: var(--primary-color);
+    }
+    
+    .btn-modal-cancel {
+        border-radius: 50px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+    }
+    
+    .btn-modal-submit {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        border-radius: 50px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+    }
+    
+    .btn-modal-submit:hover {
+        background: linear-gradient(135deg, var(--primary-color), #1b4b1b);
+    }
+    
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.6rem;
+        }
+        
+        .culture-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .page-header {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-header h1 i {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .culture-card .card-text {
+            color: #e0e0e0;
+        }
+        
+        .culture-image-container {
+            background-color: #333;
+        }
+        
+        .culture-image-fallback {
+            color: #666;
+        }
+        
+        .culture-card .card-footer {
+            border-top-color: rgba(255, 255, 255, 0.05);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .form-control, .form-select {
+            background-color: #333;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+        
+        .modal-footer {
+            border-top-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .empty-alert {
+            background-color: rgba(33, 150, 243, 0.2);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="bi bi-tree"></i> Nos Cultures Référencées</h1>
+    <a href="#" class="btn btn-add-culture" data-bs-toggle="modal" data-bs-target="#cultureModal">
+        <i class="bi bi-plus-circle"></i> Proposer une culture
+    </a>
+</div>
+
+<div class="row g-4">
+    {% for culture in object_list %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card culture-card h-100">
+            <div class="culture-image-container">
+                {% if culture.image %}
+                <img src="{{ culture.image.url }}" class="culture-image" alt="{{ culture.nom }}" onerror="this.style.display='none'; document.getElementById('fallback-{{ culture.id }}').style.display='block';">
+                <div id="fallback-{{ culture.id }}" class="culture-image-fallback" style="display: none;">
+                    <i class="bi bi-tree"></i>
+                </div>
+                {% else %}
+                <div class="culture-image-fallback">
+                    <i class="bi bi-tree"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ culture.nom }}</h3>
+                <span class="badge culture-badge bg-{% if culture.type_culture == 'CEREALE' %}warning-gradient{% elif culture.type_culture == 'LEGUME' %}success-gradient{% else %}info-gradient{% endif %}">
+                    {{ culture.get_type_culture_display }}
+                </span>
+                <p class="card-text">{{ culture.description|truncatewords:20 }}</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'agriculture:detail_culture' culture.pk %}" class="btn btn-details">
+                    <i class="bi bi-arrow-right"></i> Voir détails
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="empty-alert">
+            <i class="bi bi-info-circle"></i>
+            <div>
+                <h4 class="fw-bold mb-1">Aucune culture disponible</h4>
+                <p class="mb-0">Aucune culture n'est actuellement référencée dans notre base de données. Vous pouvez en proposer une en cliquant sur le bouton "Proposer une culture".</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal pour proposition de culture -->
+<div class="modal fade" id="cultureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i>Proposer une nouvelle culture</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="cultureForm">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de la culture</label>
+                        <input type="text" class="form-control" placeholder="Ex: Maïs, Tomate, etc." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" name="culture_type" required>
+                            <option value="" disabled selected>Choisir un type</option>
+                            {% for type in culture_types %}
+                            <option value="{{ type.0 }}">{{ type.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" rows="4" placeholder="Décrivez brièvement cette culture..." required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-modal-cancel btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" form="cultureForm" class="btn btn-modal-submit">Soumettre</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Animation pour le modal
+    document.addEventListener('DOMContentLoaded', function() {
+        const cultureModal = document.getElementById('cultureModal');
+        cultureModal.addEventListener('show.bs.modal', function (event) {
+            // Animation pour l'ouverture
+            this.querySelector('.modal-dialog').style.transition = 'transform 0.3s ease';
+            this.querySelector('.modal-dialog').style.transform = 'scale(0.9)';
+            
+            setTimeout(() => {
+                this.querySelector('.modal-dialog').style.transform = 'scale(1)';
+            }, 50);
+        });
+        
+        // Gestion des erreurs d'image
+        const images = document.querySelectorAll('.culture-image');
+        images.forEach(img => {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                const fallbackId = this.getAttribute('onerror').match(/document\.getElementById\('(fallback-[^']+)'\)/)[1];
+                document.getElementById(fallbackId).style.display = 'block';
+            });
+        });
+        
+        // Validation du formulaire
+        const cultureForm = document.getElementById('cultureForm');
+        cultureForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Ici, vous pourriez ajouter l'envoi AJAX ou autre logique
+            
+            // Simuler une soumission réussie
+            const modal = bootstrap.Modal.getInstance(cultureModal);
+            modal.hide();
+            
+            // Afficher un message de confirmation
+            alert('Votre proposition a été soumise avec succès !');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ category.name }} - {% trans "Formations" %}{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ category.description|truncatewords:20 }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- En-tête de la catégorie -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 mb-8">
+        <div class="flex items-center mb-4">
+            {% if category.icon %}
+            <i class="{{ category.icon }} text-4xl mr-4"></i>
+            {% endif %}
+            <div>
+                <h1 class="text-4xl font-bold">{{ category.name }}</h1>
+                <p class="text-blue-100 mt-2">{{ total_formations }} {% trans "formation(s) disponible(s)" %}</p>
+            </div>
+        </div>
+        {% if category.description %}
+        <p class="text-lg opacity-90">{{ category.description }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Filtres et tri -->
+    <div class="flex flex-wrap justify-between items-center mb-6">
+        <div class="flex items-center space-x-4 mb-4 lg:mb-0">
+            <span class="text-gray-600">{% trans "Trier par:" %}</span>
+            <select class="border rounded-lg px-3 py-2" onchange="updateSort(this.value)">
+                <option value="newest">{% trans "Plus récent" %}</option>
+                <option value="popular">{% trans "Plus populaire" %}</option>
+                <option value="price_low">{% trans "Prix croissant" %}</option>
+                <option value="price_high">{% trans "Prix décroissant" %}</option>
+                <option value="rating">{% trans "Mieux noté" %}</option>
+            </select>
+        </div>
+        
+        <div class="text-gray-600">
+            {{ total_formations }} {% trans "résultat(s)" %}
+        </div>
+    </div>
+
+    <!-- Liste des formations -->
+    {% if formations %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+        {% for formation in formations %}
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            <!-- Image de la formation -->
+            <div class="relative">
+                {% if formation.thumbnail %}
+                <img src="{{ formation.thumbnail.url }}" alt="{{ formation.title }}" class="w-full h-48 object-cover">
+                {% else %}
+                <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-book text-gray-400 text-4xl"></i>
+                </div>
+                {% endif %}
+                
+                <!-- Badge niveau -->
+                <span class="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs">
+                    {{ formation.get_difficulty_display }}
+                </span>
+                
+                <!-- Badge prix/gratuit -->
+                {% if formation.is_free %}
+                <span class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs">
+                    {% trans "Gratuit" %}
+                </span>
+                {% elif formation.is_on_sale %}
+                <span class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
+                    -{{ formation.discount_percentage }}%
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Contenu -->
+            <div class="p-4">
+                <h3 class="font-semibold text-lg mb-2 line-clamp-2">
+                    <a href="{{ formation.get_absolute_url }}" class="text-gray-800 hover:text-blue-600">
+                        {{ formation.title }}
+                    </a>
+                </h3>
+                
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ formation.short_description }}</p>
+                
+                <!-- Métadonnées -->
+                <div class="flex items-center text-xs text-gray-500 mb-3">
+                    <i class="fas fa-clock mr-1"></i>
+                    <span class="mr-3">{{ formation.duration }}h</span>
+                    <i class="fas fa-users mr-1"></i>
+                    <span>{{ formation.enrolled_count }} {% trans "étudiants" %}</span>
+                </div>
+                
+                <!-- Prix -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        {% if formation.is_free %}
+                        <span class="text-green-600 font-bold">{% trans "Gratuit" %}</span>
+                        {% else %}
+                        <div class="flex items-center">
+                            <span class="text-xl font-bold text-gray-800">{{ formation.price }} CFA</span>
+                            {% if formation.original_price %}
+                            <span class="text-sm text-gray-500 line-through ml-2">{{ formation.original_price }} CFA</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{{ formation.get_absolute_url }}" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700">
+                        {% trans "Voir plus" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center">
+        <nav class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3 py-2 bg-blue-600 text-white rounded">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Aucune formation -->
+    <div class="text-center py-12">
+        <i class="fas fa-book text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">{% trans "Aucune formation disponible" %}</h3>
+        <p class="text-gray-500">{% trans "Cette catégorie ne contient pas encore de formations." %}</p>
+        <a href="{% url 'formations:list' %}" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            {% trans "Voir toutes les formations" %}
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function updateSort(sortValue) {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sortValue);
+    window.location.href = url.toString();
+}
+</script>
+{% endblock %}

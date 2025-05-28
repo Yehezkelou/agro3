@@ -1,0 +1,154 @@
+<!-- formations/my_formations.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Formations</title>
+</head>
+<body>
+    <div class="my-formations">
+        <header>
+            <h1>Mes Formations</h1>
+            
+            <!-- Statistiques -->
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <span class="stat-number">{{ stats.total }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ stats.completed }}</span>
+                    <span class="stat-label">Terminées</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ stats.in_progress }}</span>
+                    <span class="stat-label">En Cours</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ stats.pending }}</span>
+                    <span class="stat-label">En Attente</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filtres -->
+        <div class="filters">
+            <form method="get">
+                <select name="status" onchange="this.form.submit()">
+                    <option value="all" {% if current_status == 'all' %}selected{% endif %}>Toutes</option>
+                    <option value="completed" {% if current_status == 'completed' %}selected{% endif %}>Terminées</option>
+                    <option value="in_progress" {% if current_status == 'in_progress' %}selected{% endif %}>En Cours</option>
+                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>En Attente</option>
+                </select>
+            </form>
+        </div>
+
+        <!-- Liste des formations -->
+        <div class="enrollments-list">
+            {% for enrollment in enrollments %}
+            <div class="enrollment-card">
+                <div class="enrollment-info">
+                    {% if enrollment.formation.thumbnail %}
+                        <img src="{{ enrollment.formation.thumbnail.url }}" alt="{{ enrollment.formation.title }}" class="formation-thumbnail">
+                    {% endif %}
+                    
+                    <div class="formation-details">
+                        <h3><a href="{{ enrollment.formation.get_absolute_url }}">{{ enrollment.formation.title }}</a></h3>
+                        <p>{{ enrollment.formation.short_description }}</p>
+                        
+                        <div class="formation-meta">
+                            <span class="category">{{ enrollment.formation.category.name }}</span>
+                            <span class="difficulty">{{ enrollment.formation.get_difficulty_display }}</span>
+                            <span class="duration">{{ enrollment.formation.duration }}h</span>
+                        </div>
+                        
+                        <div class="enrollment-dates">
+                            <span class="enrollment-date">Inscrit le {{ enrollment.date_enrolled|date:"d M Y" }}</span>
+                            {% if enrollment.completion_date %}
+                                <span class="completion-date">Terminé le {{ enrollment.completion_date|date:"d M Y" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="enrollment-status">
+                    <!-- Status du paiement -->
+                    <div class="payment-status">
+                        {% if enrollment.payment_status == 'COMPLETED' %}
+                            <span class="status-badge success">Payé</span>
+                        {% elif enrollment.payment_status == 'PENDING' %}
+                            <span class="status-badge warning">En Attente</span>
+                        {% elif enrollment.payment_status == 'FAILED' %}
+                            <span class="status-badge error">Échec</span>
+                        {% elif enrollment.payment_status == 'REFUNDED' %}
+                            <span class="status-badge info">Remboursé</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Progression -->
+                    {% if enrollment.can_access_content %}
+                        <div class="progress-section">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: {{ enrollment.progress_percentage }}%"></div>
+                            </div>
+                            <span class="progress-text">{{ enrollment.progress_percentage }}%</span>
+                            
+                            {% if enrollment.completed %}
+                                <span class="completion-badge">Terminé</span>
+                            {% else %}
+                                <span class="progress-label">En cours</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Actions -->
+                    <div class="enrollment-actions">
+                        {% if enrollment.payment_status == 'PENDING' %}
+                            <a href="{% url 'payments:process' enrollment.id %}" class="btn-warning">Procéder au Paiement</a>
+                        {% elif enrollment.can_access_content %}
+                            <a href="{% url 'formations:content' enrollment.formation.slug %}" class="btn-primary">Continuer</a>
+                        {% endif %}
+                        
+                        {% if enrollment.completed and not enrollment.formationreview %}
+                            <a href="{{ enrollment.formation.get_absolute_url }}#review" class="btn-secondary">Laisser un Avis</a>
+                        {% endif %}
+                        
+                        {% if enrollment.certificate_issued %}
+                            <a href="{{ enrollment.certificate_url }}" class="btn-success" target="_blank">Certificat</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-enrollments">
+                <h3>Aucune formation trouvée</h3>
+                <p>Vous n'êtes inscrit à aucune formation pour le moment.</p>
+                <a href="{% url 'formations:list' %}" class="btn-primary">Découvrir les Formations</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?status={{ current_status }}&page={{ page_obj.previous_page_number }}">&laquo; Précédent</a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?status={{ current_status }}&page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?status={{ current_status }}&page={{ page_obj.next_page_number }}">Suivant &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}{{ culture.nom }} | Agrosmart{% endblock %}
+
+{% block styles %}
+<style>
+    /* Styles spécifiques pour la page de détail de culture */
+    .breadcrumb {
+        background-color: rgba(46, 125, 50, 0.1);
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    
+    .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .breadcrumb-item.active {
+        color: #555;
+        font-weight: 500;
+    }
+    
+    .breadcrumb-item+.breadcrumb-item::before {
+        color: var(--primary-color);
+    }
+    
+    .culture-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    /* Section image corrigée */
+    .culture-image-container {
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 50%; /* Ratio 2:1 */
+        overflow: hidden;
+        background-color: #f0f0f0;
+    }
+    
+    .culture-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    
+    .culture-image-fallback {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        color: #aaa;
+    }
+    
+    .culture-card .card-body {
+        padding: 2rem;
+    }
+    
+    .culture-card .card-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-dark);
+        margin-bottom: 1rem;
+    }
+    
+    .badge {
+        padding: 0.6rem 1rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .badge i {
+        font-size: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin: 1.5rem 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .section-title i {
+        color: var(--primary-color);
+    }
+    
+    .info-card {
+        border: none;
+        border-radius: 0.75rem;
+        background-color: rgba(46, 125, 50, 0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .info-card h5 {
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .info-card i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .info-card p {
+        margin-bottom: 0;
+        color: #555;
+    }
+    
+    .pratiques-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .pratiques-card .card-header {
+        padding: 1.2rem 2rem;
+        border-bottom: none;
+    }
+    
+    .pratiques-card .card-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(46, 125, 50, 0.05);
+    }
+    
+    .list-group-item:first-child {
+        border-top: none;
+    }
+    
+    .list-group-item h5 {
+        font-weight: 600;
+        color: var(--primary-dark);
+    }
+    
+    .list-group-item .text-primary {
+        color: #2196F3 !important;
+    }
+    
+    .list-group-item .text-warning {
+        color: #FF8F00 !important;
+    }
+    
+    .btn-outline-primary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        border-radius: 50px;
+        padding: 0.4rem 1rem;
+        font-weight: 500;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .collapse-content {
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+        background-color: #f8f9fa;
+    }
+    
+    .conseil-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .conseil-card .card-header {
+        padding: 1.2rem 1.5rem;
+        border-bottom: none;
+    }
+    
+    .conseil-card .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .conseil-alert {
+        border-left: 4px solid var(--primary-color);
+        background-color: rgba(46, 125, 50, 0.05);
+        border-radius: 0.5rem;
+        padding: 1.2rem;
+        margin-bottom: 0;
+    }
+    
+    .conseil-alert h5 {
+        color: var(--primary-dark);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .calendrier-card {
+        border: none;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .calendrier-card .card-header {
+        padding: 1.2rem 1.5rem;
+        border-bottom: none;
+        background-color: #FF8F00;
+    }
+    
+    .calendrier-card .card-header h3 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .periode-list {
+        margin-top: 1.5rem;
+    }
+    
+    .periode-list .list-group-item {
+        padding: 1rem 1.5rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .periode-list .list-group-item:last-child {
+        border-bottom: none;
+    }
+    
+    .periode-list i {
+        font-size: 1.2rem;
+    }
+    
+    .periode-list .text-warning {
+        color: #FF8F00 !important;
+    }
+    
+    .periode-list .text-primary {
+        color: #2196F3 !important;
+    }
+    
+    .periode-list .text-success {
+        color: #2E7D32 !important;
+    }
+    
+    /* Rating stars styling */
+    .star-rating {
+        color: #FFD700;
+        letter-spacing: 2px;
+    }
+    
+    /* Calendar placeholder */
+    #calendar {
+        height: 150px;
+        background-color: rgba(255, 143, 0, 0.1);
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    #calendar::before {
+        content: 'Calendrier de culture';
+        color: #FF8F00;
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .culture-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .culture-card .card-title {
+            font-size: 1.8rem;
+        }
+        
+        .info-card .card-body {
+            padding: 1.2rem;
+        }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .breadcrumb {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .breadcrumb-item.active {
+            color: #e0e0e0;
+        }
+        
+        .info-card {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .info-card p {
+            color: #e0e0e0;
+        }
+        
+        .list-group-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .collapse-content {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .conseil-alert {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        #calendar {
+            background-color: rgba(255, 143, 0, 0.2);
+        }
+        
+        .periode-list .list-group-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .culture-image-container {
+            background-color: #333;
+        }
+        
+        .culture-image-fallback {
+            color: #666;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'agriculture:liste_cultures' %}">Cultures</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ culture.nom }}</li>
+            </ol>
+        </nav>
+
+        <div class="card culture-card">
+            <!-- Section image corrigée -->
+            <div class="culture-image-container">
+                {% if culture.image %}
+                <img src="{{ culture.image.url }}" class="culture-image" alt="{{ culture.nom }}" onerror="this.style.display='none'; document.getElementById('fallback-icon').style.display='block';">
+                <div id="fallback-icon" class="culture-image-fallback" style="display: none;">
+                    <i class="bi bi-image"></i>
+                </div>
+                {% else %}
+                <div class="culture-image-fallback">
+                    <i class="bi bi-tree"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="card-body">
+                <h1 class="card-title">{{ culture.nom }}</h1>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="badge bg-primary">
+                        <i class="bi bi-tag"></i> {{ culture.get_type_culture_display }}
+                    </span>
+                    <span class="badge bg-info">
+                        <i class="bi bi-clock"></i> Cycle: {{ culture.cycle_croissance }} jours
+                    </span>
+                </div>
+                
+                <h3 class="section-title"><i class="bi bi-info-circle"></i> Description</h3>
+                <p class="card-text">{{ culture.description }}</p>
+                
+                <div class="row mt-4 g-4">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="card-body">
+                                <h5><i class="bi bi-droplet"></i> Besoins en eau</h5>
+                                <p>{{ culture.besoin_eau }} mm par saison</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="card-body">
+                                <h5><i class="bi bi-thermometer-sun"></i> Température idéale</h5>
+                                <p>{{ culture.temperature_ideale }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card pratiques-card">
+            <div class="card-header bg-success text-white">
+                <h2><i class="bi bi-journal-check"></i> Pratiques Recommandées</h2>
+            </div>
+            <div class="card-body p-0">
+                {% if pratiques %}
+                <div class="list-group list-group-flush">
+                    {% for pratique in pratiques %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <h5 class="mb-1">{{ pratique.nom }}</h5>
+                            <span class="badge bg-{% if pratique.saison == 'PLUIE' %}primary{% else %}warning{% endif %}">
+                                {{ pratique.get_saison_display }}
+                            </span>
+                        </div>
+                        <p class="mb-3">{{ pratique.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted d-flex align-items-center gap-2">
+                                Difficulté: 
+                                <span class="star-rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= pratique.difficulte %}★{% else %}☆{% endif %}
+                                    {% endfor %}
+                                </span>
+                            </small>
+                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" 
+                                    data-bs-target="#pratique-{{ pratique.id }}">
+                                <i class="bi bi-chevron-down"></i> Détails
+                            </button>
+                        </div>
+                        <div class="collapse mt-3" id="pratique-{{ pratique.id }}">
+                            <div class="collapse-content">
+                                <h6 class="fw-bold mb-2">Avantages:</h6>
+                                <p class="mb-0">{{ pratique.avantages }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info m-4">
+                    <i class="bi bi-info-circle me-2"></i> Aucune pratique disponible pour cette culture actuellement.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card conseil-card">
+            <div class="card-header bg-primary text-white">
+                <h3><i class="bi bi-chat-square-text"></i> Conseil Expert</h3>
+            </div>
+            <div class="card-body">
+                <div class="conseil-alert">
+                    <h5>Conseil pour {{ culture.nom }}</h5>
+                    <p>Pour optimiser votre rendement avec cette culture, assurez-vous de maintenir un pH du sol entre 6.0 et 7.5.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card calendrier-card">
+            <div class="card-header text-white">
+                <h3><i class="bi bi-calendar-event"></i> Calendrier</h3>
+            </div>
+            <div class="card-body">
+                <div id="calendar"></div>
+                <div class="periode-list">
+                    <h5 class="fw-bold mb-3">Périodes idéales:</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-sun text-warning"></i> Semis: Mars-Avril
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-droplet text-primary"></i> Croissance: Avril-Juin
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-flower2 text-success"></i> Récolte: Juillet-Août
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Script pour le calendrier (exemple simplifié)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ici vous pourriez intégrer un vrai calendrier comme FullCalendar
+        console.log("Calendrier pour {{ culture.nom }} serait initialisé ici");
+    });
+    
+    // Ajout d'une animation subtile pour les boutons de détails
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (this.getAttribute('aria-expanded') === 'true') {
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            } else {
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            }
+        });
+    });
+</script>
+{% endblock %}

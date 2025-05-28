@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ formation.title }}</title>
+    <meta name="description" content="{{ formation.meta_description|default:formation.short_description }}">
+    <meta name="keywords" content="{{ formation.meta_keywords }}">
+</head>
+<body>
+    <div class="formation-detail">
+        <header class="formation-header">
+            <div class="formation-main-info">
+                <nav class="breadcrumb">
+                    <a href="{% url 'formations:list' %}">Formations</a>
+                    {% if formation.category %}
+                        <span>/</span>
+                        <a href="{{ formation.category.get_absolute_url }}">{{ formation.category.name }}</a>
+                    {% endif %}
+                    <span>/</span>
+                    <span>{{ formation.title }}</span>
+                </nav>
+
+                <h1>{{ formation.title }}</h1>
+                <p class="formation-description">{{ formation.short_description }}</p>
+
+                <div class="formation-badges">
+                    {% if formation.is_featured %}
+                        <span class="badge featured">En Vedette</span>
+                    {% endif %}
+                    {% if formation.is_free %}
+                        <span class="badge free">Gratuit</span>
+                    {% endif %}
+                    {% if formation.is_full %}
+                        <span class="badge full">Complet</span>
+                    {% endif %}
+                </div>
+
+                <div class="formation-meta">
+                    <div class="meta-item">
+                        <strong>Catégorie:</strong> {{ formation.category.name|default:"Non classé" }}
+                    </div>
+                    <div class="meta-item">
+                        <strong>Niveau:</strong> {{ formation.get_difficulty_display }}
+                    </div>
+                    <div class="meta-item">
+                        <strong>Durée:</strong> {{ formation.duration }} heures
+                    </div>
+                    <div class="meta-item">
+                        <strong>Inscrits:</strong> {{ total_enrolled }}
+                        {% if formation.max_students %}
+                            / {{ formation.max_students }}
+                        {% endif %}
+                    </div>
+                    {% if avg_rating > 0 %}
+                    <div class="meta-item">
+                        <strong>Note:</strong> 
+                        <div class="rating">
+                            {% for i in "12345" %}
+                                <span class="star {% if i|add:0 <= avg_rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                            <span>{{ avg_rating }}/5</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="formation-sidebar">
+                {% if formation.thumbnail %}
+                    <img src="{{ formation.thumbnail.url }}" alt="{{ formation.title }}" class="formation-thumbnail">
+                {% endif %}
+
+                <div class="price-section">
+                    {% if formation.is_free %}
+                        <div class="price-free">Gratuit</div>
+                    {% else %}
+                        {% if formation.is_on_sale %}
+                            <div class="original-price">{{ formation.original_price }} CFA</div>
+                            <div class="discount-badge">-{{ formation.discount_percentage }}%</div>
+                        {% endif %}
+                        <div class="current-price">{{ formation.price }} CFA</div>
+                    {% endif %}
+                </div>
+
+                <div class="enrollment-section">
+                    {% if is_enrolled %}
+                        {% if can_access %}
+                            <a href="{% url 'formations:content' formation.slug %}" class="btn-success">Accéder au Contenu</a>
+                            {% if not user_enrollment.completed %}
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: {{ user_enrollment.progress_percentage }}%"></div>
+                                    <span>{{ user_enrollment.progress_percentage }}% complété</span>
+                                </div>
+                            {% else %}
+                                <div class="completion-badge">Formation Terminée</div>
+                            {% endif %}
+                        {% else %}
+                            <div class="payment-pending">
+                                <p>Paiement en attente</p>
+                                <a href="{% url 'payments:process' user_enrollment.id %}" class="btn-warning">Procéder au Paiement</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        {% if not formation.is_full %}
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'formations:enroll' formation.slug %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-primary">
+                                        {% if formation.is_free %}S'inscrire Gratuitement{% else %}S'inscrire{% endif %}
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn-primary">Connectez-vous pour vous inscrire</a>
+                            {% endif %}
+                        {% else %}
+                            <button class="btn-disabled" disabled>Formation Complète</button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                {% if formation.video_url %}
+                <div class="video-preview">
+                    <h3>Aperçu Vidéo</h3>
+                    <iframe src="{{ formation.video_url }}" frameborder="0" allowfullscreen></iframe>
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <div class="formation-content">
+            <section class="description-section">
+                <h2>Description</h2>
+                <div class="description-content">
+                    {{ formation.description|linebreaks }}
+                </div>
+            </section>
+
+            {% if formation.learning_objectives %}
+            <section class="objectives-section">
+                <h2>Objectifs d'Apprentissage</h2>
+                <div class="objectives-content">
+                    {{ formation.learning_objectives|linebreaks }}
+                </div>
+            </section>
+            {% endif %}
+
+            {% if formation.prerequisites %}
+            <section class="prerequisites-section">
+                <h2>Prérequis</h2>
+                <div class="prerequisites-content">
+                    {{ formation.prerequisites|linebreaks }}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- Section des avis -->
+            <section class="reviews-section">
+                <h2>Avis des Étudiants</h2>
+                
+                {% if avg_rating > 0 %}
+                <div class="rating-summary">
+                    <div class="average-rating">
+                        <span class="rating-number">{{ avg_rating }}</span>
+                        <div class="stars">
+                            {% for i in "12345" %}
+                                <span class="star {% if i|add:0 <= avg_rating %}filled{% endif %}">★</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="rating-breakdown">
+                        {% for rating, count in rating_breakdown.items %}
+                        <div class="rating-row">
+                            <span>{{ rating }} étoiles</span>
+                            <div class="rating-bar">
+                                <div class="rating-fill" style="width: {% if reviews.count > 0 %}{{ count|mul:100|div:reviews.count }}{% else %}0{% endif %}%"></div>
+                            </div>
+                            <span>{{ count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if reviews %}
+                <div class="reviews-list">
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <strong>{{ review.user_formation.user.get_full_name|default:review.user_formation.user.username }}</strong>
+                                {% if review.is_verified %}
+                                    <span class="verified-badge">Vérifié</span>
+                                {% endif %}
+                            </div>
+                            <div class="review-rating">
+                                {% for i in "12345" %}
+                                    <span class="star {% if i|add:0 <= review.rating %}filled{% endif %}">★</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <h4>{{ review.title }}</h4>
+                        <p>{{ review.content }}</p>
+                        <div class="review-footer">
+                            <span class="review-date">{{ review.created_at|date:"d M Y" }}</span>
+                            {% if review.helpful_count > 0 %}
+                                <span class="helpful-count">{{ review.helpful_count }} personnes ont trouvé cela utile</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                    <p>Aucun avis pour le moment.</p>
+                {% endif %}
+
+                <!-- Formulaire d'avis -->
+                {% if user.is_authenticated and is_enrolled and can_access %}
+                    {% if not user_enrollment.formationreview %}
+                    <div class="review-form">
+                        <h3>Laisser un Avis</h3>
+                        <form method="post" action="{% url 'formations:submit_review' formation.slug %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Note:</label>
+                                <div class="rating-input">
+                                    {% for i in "12345" %}
+                                        <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
+                                        <label for="star{{ i }}">★</label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="title">Titre de l'avis:</label>
+                                <input type="text" id="title" name="title" maxlength="200" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="content">Votre avis:</label>
+                                <textarea id="content" name="content" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Publier l'Avis</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </section>
+
+            <!-- Formations similaires -->
+            {% if similar_formations %}
+            <section class="similar-formations">
+                <h2>Formations Similaires</h2>
+                <div class="formation-grid">
+                    {% for similar in similar_formations %}
+                    <div class="formation-card">
+                        {% if similar.thumbnail %}
+                            <img src="{{ similar.thumbnail.url }}" alt="{{ similar.title }}">
+                        {% endif %}
+                        <div class="formation-info">
+                            <h3><a href="{{ similar.get_absolute_url }}">{{ similar.title }}</a></h3>
+                            <p>{{ similar.short_description }}</p>
+                            <div class="formation-meta">
+                                <span class="difficulty">{{ similar.get_difficulty_display }}</span>
+                                <span class="duration">{{ similar.duration }}h</span>
+                            </div>
+                            <div class="formation-price">
+                                {% if similar.is_free %}
+                                    <span class="price-free">Gratuit</span>
+                                {% else %}
+                                    <span class="price">{{ similar.price }} CFA</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Script pour la notation interactive
+        document.querySelectorAll('.rating-input input').forEach(input => {
+            input.addEventListener('change', function() {
+                const rating = this.value;
+                const stars = this.parentNode.querySelectorAll('label');
+                stars.forEach((star, index) => {
+                    star.style.color = index < rating ? '#ffc107' : '#e4e5e9';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
